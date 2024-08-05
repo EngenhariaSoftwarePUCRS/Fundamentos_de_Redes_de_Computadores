@@ -1,2 +1,3 @@
-# Fundamentos_de_Redes_de_Computadores
-| Fundamentos de Redes de COmputadores | Cristina Moreira Nunes | 6º | 2024/2 |  | 98709-04 | 60 |
+| Disciplina | Professora | Semestre Previsto | Ano Cursada | Grau Obtido | CodiCred | Carga Horária |
+| --- | --- | --- | --- | --- | --- | --- |
+| Fundamentos de Redes de Computadores | [Cristina Moreira Nunes](https://www.inf.pucrs.br/~cnunes/) | 6º | 2024/2 |  | 98H00-04 | 60 |
