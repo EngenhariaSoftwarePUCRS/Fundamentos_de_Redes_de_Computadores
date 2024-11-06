@@ -1,7 +1,5 @@
 from typing import Literal
 
-from config import ACK_FILE, ACK_MSG, ACK_REG, PREFIX_FILE, PREFIX_MSG, PREFIX_QUIT, PREFIX_REFRESH, PREFIX_REG, PREFIX_WHOAMI
-
 
 color_mapper = {
     'black': '\033[30m',
@@ -48,13 +46,13 @@ def print_(color: Literal['black', 'red', 'green', 'yellow', 'blue', 'magenta', 
 
 
 def get_print(message: str) -> callable:
-    if message.startswith(PREFIX_REG) or message.startswith(ACK_REG):
+    if message.startswith("/REG"):
         return print_reg
-    if message.startswith(PREFIX_MSG) or message.startswith(ACK_MSG):
+    if message.startswith("/MSG"):
         return print_msg
-    if message.startswith(PREFIX_FILE) or message.startswith(ACK_FILE):
+    if message.startswith("/FILE"):
         return print_file
-    if message.startswith(PREFIX_QUIT):
+    if message.startswith("/QUIT"):
         return print_quit
     return print
 
@@ -62,12 +60,12 @@ def get_print(message: str) -> callable:
 def print_options():
     print("\n", "=" * 30)
     print("Options:")
-    print_reg(f"{PREFIX_REG} <nickname>: Register with the server")
-    print_whoami(f"{PREFIX_WHOAMI}: Get your nickname")
-    print_msg(f"{PREFIX_MSG} <message>: Send a message to all clients")
-    print_msg(f"{PREFIX_MSG} @<nickname> <message>: Send a private message to a client")
-    print_("white", f"{PREFIX_REFRESH}: Refresh to check for new messages")
-    print_file(f"{PREFIX_FILE} <file>: Send a file to all clients")
-    print_file(f"{PREFIX_FILE} @<nickname> <file>: Send a file to a client")
-    print_quit(f"{PREFIX_QUIT}: Disconnect from the server")
+    print_reg(f"{"/REG"} <nickname>: Register with the server")
+    print_whoami(f"{"/WHOAMI"}: Get your nickname")
+    print_msg(f"{"/MSG"} <message>: Send a message to all clients")
+    print_msg(f"{"/MSG"} @<nickname> <message>: Send a private message to a client")
+    print_("white", f"{"/REFRESH"}: Refresh to check for new messages")
+    print_file(f"{"/FILE"} <file>: Send a file to all clients")
+    print_file(f"{"/FILE"} @<nickname> <file>: Send a file to a client")
+    print_quit(f"{"/QUIT"}: Disconnect from the server")
     print()

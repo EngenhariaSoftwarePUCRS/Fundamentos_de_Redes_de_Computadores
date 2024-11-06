@@ -1,31 +1,23 @@
 from typing import Tuple
 
 
-server_name = '127.0.0.1'
-server_port_udp = 13000
-server_udp = (server_name, server_port_udp)
-
-ACK = 'ACK'
-ACK_EMPTY = 'ACK (empty message)'
-ACK_FILE = 'ACK (file sent)'
-ACK_MSG = 'ACK (message sent)'
-ACK_REFRESH = 'ACK (refreshed)'
-ACK_REG = 'ACK (client registered)'
-ACK_UNREG = 'ACK (client unregistered)'
-NACK = 'NACK'
-NACK_INVALID = 'NACK (invalid message)'
-NACK_NOT_FOUND = 'NACK (client not found)'
+server_host_ip = '127.0.0.1'
+server_port = 9000
 
 MAX_SERVER_CONNECTIONS = 5
 
 MESSAGE_MAX_SIZE_UDP = 1024
 
-PREFIX_FILE = '/FILE'
-PREFIX_MSG = '/MSG'
-PREFIX_QUIT = '/QUIT'
-PREFIX_REFRESH = '/REFRESH'
-PREFIX_REG = '/REG'
-PREFIX_WHOAMI = '/WHOAMI'
+REGEX_IPV4 = r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+# @192.168.1.2-1@192.168.1.3-1 
+# Ou seja, “@” indica uma tupla, IP de Destino e Métrica. A métrica é separada do IP por um “-” (hífen).
+REGEX_TABLE_ANNOUNCEMENT = r'@' + REGEX_IPV4 + r'-\d+'
+# *192.168.1.1 
+# Ou seja, um * (asterisco) seguido do próprio endereço IP do roteador que entrou na rede. 
+REGEX_ROUTER_ANNOUNCEMENT = r'\*' + REGEX_IPV4
+# !192.168.1.2;192.168.1.1;Oi tudo bem? 
+# Ou seja, “!” indica que uma mensagem de texto foi recebida. O primeiro endereço é o IP da origem, o segundo é o IP de destino e a seguir vem a mensagem de texto. Cada informação é separada um “;” (ponto e vírgula).
+REGEX_MESSAGE = r'!' + REGEX_IPV4 + r';' + REGEX_IPV4 + r';.+' 
 
 Address = Tuple[str, int]
 

@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Debug: Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "T1_Chat/server_udp.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Debug: Client",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "T1_Chat/client_udp.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}
