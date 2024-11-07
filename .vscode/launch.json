@@ -4,14 +4,14 @@
             "name": "Debug: Server",
             "type": "debugpy",
             "request": "launch",
-            "program": "T1_Chat/router.py",
+            "program": "router.py",
             "console": "integratedTerminal"
         },
         {
             "name": "Debug: Client",
             "type": "debugpy",
             "request": "launch",
-            "program": "T1_Chat/client_udp.py",
+            "program": "client.py",
             "console": "integratedTerminal"
         }
     ]
