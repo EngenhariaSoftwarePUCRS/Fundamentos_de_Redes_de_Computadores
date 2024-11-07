@@ -22,3 +22,23 @@ class RoutingTable:
             if route[0] == ip:
                 self.routes[i] = (ip, metric, output)
                 break
+
+    def serialize_routing_table_to_string(self) -> str:
+        return "\n".join([f""@"{route[0]},"-"{route[1]}" for route in self.routes])
+
+    # def parse_routing_table_from_string(self, table_string: str):
+    #     self.routes = []
+    #     for route in table_string.split("\n"):
+    #         ip, metric = route.split(",")
+    #         self.routes.append((ip, int(metric), None))
+
+    def print_routing_table(self):
+        print("Destination\tMetric\tOutput")
+        for route in self.routes:
+            print(f"{route[0]}\t{route[1]}\t{route[2]}")
+
+    def send_routing_table_15seconds(self):
+        while True:
+            print("Sending routing table...")
+            self.print_routing_table()
+            time.sleep(15)
