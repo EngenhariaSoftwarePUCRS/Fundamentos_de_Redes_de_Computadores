@@ -4,7 +4,7 @@
             "name": "Debug: Server",
             "type": "debugpy",
             "request": "launch",
-            "program": "T1_Chat/server_udp.py",
+            "program": "T1_Chat/router.py",
             "console": "integratedTerminal"
         },
         {
