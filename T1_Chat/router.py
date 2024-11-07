@@ -67,7 +67,8 @@ def register_route(message: str, sender: Address):
         route_to_ip = routing_table.get_route(ip)
         sender_ip = sender[0]
         if not route_to_ip:
-            routing_table.register_route(ip, int(metric), sender_ip)
+            metric = int(metric) + 1
+            routing_table.register_route(ip, metric, sender_ip)
         else:
             # If I already know how to get to this IP, update the metric if it is lower
             if int(metric) < route_to_ip[1]:
