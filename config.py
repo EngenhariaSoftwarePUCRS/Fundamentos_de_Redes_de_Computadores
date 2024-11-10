@@ -1,8 +1,10 @@
 from typing import Tuple
 
 
-router_ip = '127.0.0.1'
+default_router_ip = '127.0.0.1'
 router_port = 9000
+
+default_neighbours_file = 'roteadores.txt'
 
 MESSAGE_MAX_SIZE_UDP = 1024
 

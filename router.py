@@ -7,7 +7,7 @@ from config import (
     MESSAGE_MAX_SIZE_UDP,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
     Address,
-    router_ip, router_port,
+    default_router_ip, router_port, default_neighbours_file,
 )
 from print import *
 from routing_table import RoutingTable
@@ -16,21 +16,23 @@ from routing_table import RoutingTable
 router_socket = socket(AF_INET, SOCK_DGRAM)
 router_socket.settimeout(1)
 
+router_ip: str = default_router_ip
 routing_table: RoutingTable
 
 should_resend: bool = False
 
 
-def main(router_ip: str, neighbours_file: str = 'roteadores.txt'):
+def main(self_ip: str, neighbours_file: str):
+    global should_resend, router_ip
+    router_ip = self_ip
     router_socket.bind((router_ip, router_port))
     print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
-    get_neighbours(router_ip, neighbours_file)
 
-    threading.Thread(target=user_input_thread, daemon=True).start()
+    get_neighbours(router_ip, neighbours_file)
 
     enter_network(router_ip)
 
-    global should_resend
+    threading.Thread(target=user_input_thread, daemon=True).start()
     counter = 0
     while True:
         counter += 1
@@ -103,8 +105,10 @@ def handle_message(message: str, sender: Address):
     if re.match(REGEX_TABLE_ANNOUNCEMENT, message):
         handle_route(message, sender)
     
-    # elif re.match(REGEX_ROUTER_ANNOUNCEMENT, message):
-    #     register_router(message)
+    elif re.match(REGEX_ROUTER_ANNOUNCEMENT, message):
+        global router_ip
+        new_router_ip = message[1:]
+        routing_table.register_route(new_router_ip, 1, router_ip)
 
     # elif re.match(REGEX_MESSAGE, message):
     #     send_message(message)
@@ -150,8 +154,8 @@ def handle_route(message: str, sender: Address):
 if __name__ == '__main__':
     try:
         from sys import argv
-        self_ip = argv[1] if len(argv) > 1 else router_ip
-        neighbours_file: str = argv[2] if len(argv) > 2 else 'roteadores.txt'
+        self_ip = argv[1] if len(argv) > 1 else default_router_ip
+        neighbours_file: str = argv[2] if len(argv) > 2 else default_neighbours_file
         main(self_ip, neighbours_file)
     except KeyboardInterrupt:
         print('Server stopped')
