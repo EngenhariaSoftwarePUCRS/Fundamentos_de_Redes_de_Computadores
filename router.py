@@ -21,7 +21,7 @@ routing_table: RoutingTable
 def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
     server_socket.bind((server_ip, server_port))
     print(f'The server is ready to receive at {server_ip}:{server_port}')
-    get_neighbours(neighbours_file)
+    get_neighbours(server_ip, neighbours_file)
 
     threading.Thread(target=user_input_thread, daemon=True).start()
 
@@ -69,14 +69,14 @@ def user_input_thread():
             print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
 
 
-def get_neighbours(neighbours_file: str):
+def get_neighbours(self_ip: str, neighbours_file: str):
     try:
         neighbour_ips = []
         with open(neighbours_file, 'r') as file:
             for line in file:
                 neighbour_ips.append(line.strip())
         global routing_table
-        routing_table = RoutingTable(server_host_ip, neighbour_ips)
+        routing_table = RoutingTable(self_ip, neighbour_ips)
     except FileNotFoundError:
         raise FileNotFoundError(f'File {neighbours_file} not found')
     except Exception as e:
