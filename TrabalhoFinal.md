@@ -17,8 +17,10 @@ TODO:
       - [x] o endereço de origem deve ser o endereço do roteador que enviou a linha
     - [x] Se uma rota deixar de existir
       - [x] deve ser removida
+    - [x] Se a entrada gerar alteração na tabela deve anunciar imeadiatamente a mudança 
   - [x] Deve ter um método "print" que imprime a tabela para o usuário
   - [x] Deve ter um método "serialize" que converte a tabela em uma string para envio
+- [x] Remover rotas inativos (a cada 35s)
 - [ ] (Opcional) Criar classe para tratamento de mensagens
   - [ ] Deve possuir tres subclasses, uma para mensagens de roteamento, outra para mensagens de anuncio e outra para mensagens de texto
   - [ ] Deve ter um método "parse" que recebe uma mensagem e a transforma em um objeto

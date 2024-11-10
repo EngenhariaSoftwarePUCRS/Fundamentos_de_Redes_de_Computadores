@@ -18,6 +18,8 @@ server_socket.settimeout(1)
 
 routing_table: RoutingTable
 
+should_resend: bool
+
 
 def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
     server_socket.bind((server_ip, server_port))
@@ -33,7 +35,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
         if counter % 3 == 0:
             print_table(routing_table)
 
-        if counter == 15:
+        if counter == 15 or should_resend:
             print_route_send("Sending routing table to neighbours")
             for neighbour in routing_table.get_neighbours():
                 r_table = routing_table.serialize_routing_table_to_string()
@@ -105,6 +107,7 @@ def handle_message(message: str, sender: Address):
 
 
 def handle_route(message: str, sender: Address):
+    global should_resend
     table_row = re.split(r'@', message)
     for row in table_row[1:]:
         ip, metric = row.split('-')
@@ -116,10 +119,11 @@ def handle_route(message: str, sender: Address):
         elif not route_to_ip:
             metric = int(metric) + 1
             routing_table.register_route(ip, metric, sender_ip)
-        else:
+            should_resend = True
+        elif int(metric) < route_to_ip[1]:
             # If I already know how to get to this IP, update the metric if it is lower
-            if int(metric) < route_to_ip[1]:
-                routing_table.update_route(ip, int(metric), sender_ip)
+            routing_table.update_route(ip, int(metric), sender_ip)
+            should_resend = True
 
     # Remove routes that are no longer received
     known_ips = routing_table.get_ips_from_routes()
@@ -127,8 +131,10 @@ def handle_route(message: str, sender: Address):
     received_ips = routing_table.get_ips_from_routes(received_ips)
     received_ips.append(sender[0])
     routes_to_remove = set(known_ips) - set(received_ips)
-    for ip in routes_to_remove:
-        routing_table.remove_route(ip)
+    if routes_to_remove:
+        for ip in routes_to_remove:
+            routing_table.remove_route(ip)
+        should_resend = True
 
 
 if __name__ == '__main__':
