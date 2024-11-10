@@ -1,10 +1,8 @@
 from typing import Tuple
 
 
-server_host_ip = '127.0.0.1'
-server_port = 9000
-
-MAX_SERVER_CONNECTIONS = 5
+router_ip = '127.0.0.1'
+router_port = 9000
 
 MESSAGE_MAX_SIZE_UDP = 1024
 

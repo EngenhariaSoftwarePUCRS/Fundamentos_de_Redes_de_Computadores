@@ -7,24 +7,24 @@ from config import (
     MESSAGE_MAX_SIZE_UDP,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
     Address,
-    server_host_ip, server_port,
+    router_ip, router_port,
 )
 from print import *
 from routing_table import RoutingTable
 
 
-server_socket = socket(AF_INET, SOCK_DGRAM)
-server_socket.settimeout(1)
+router_socket = socket(AF_INET, SOCK_DGRAM)
+router_socket.settimeout(1)
 
 routing_table: RoutingTable
 
 should_resend: bool = False
 
 
-def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
-    server_socket.bind((server_ip, server_port))
-    print_ready(f'The server is ready to receive at {server_ip}:{server_port}')
-    get_neighbours(server_ip, neighbours_file)
+def main(router_ip: str, neighbours_file: str = 'roteadores.txt'):
+    router_socket.bind((router_ip, router_port))
+    print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
+    get_neighbours(router_ip, neighbours_file)
 
     threading.Thread(target=user_input_thread, daemon=True).start()
 
@@ -38,7 +38,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
             print_route_send("Sending routing table to neighbours")
             for neighbour in routing_table.get_neighbours():
                 r_table = routing_table.serialize_routing_table_to_string()
-                server_socket.sendto(r_table.encode(), (neighbour, server_port))
+                router_socket.sendto(r_table.encode(), (neighbour, router_port))
             should_resend = False
             continue
 
@@ -50,7 +50,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
 
         try:
             print_waiting('Waiting for messages...')
-            message, client = server_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
+            message, client = router_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
             message = message.decode()
             print_message_received(f'Received message: {message} from {client}')
             handle_message(message, client)
@@ -68,7 +68,7 @@ def user_input_thread():
         user_input = input()
         try:
             _ip, target_ip, message = user_input.split(';')
-            server_socket.sendto(message.encode(), (target_ip, server_port))
+            router_socket.sendto(message.encode(), (target_ip, router_port))
             print(f'Message sent to {target_ip}')
         except ValueError:
             print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
@@ -144,7 +144,7 @@ def handle_route(message: str, sender: Address):
 if __name__ == '__main__':
     try:
         from sys import argv
-        self_ip = argv[1] if len(argv) > 1 else server_host_ip
+        self_ip = argv[1] if len(argv) > 1 else router_ip
         neighbours_file: str = argv[2] if len(argv) > 2 else 'roteadores.txt'
         main(self_ip, neighbours_file)
     except KeyboardInterrupt:
@@ -152,5 +152,5 @@ if __name__ == '__main__':
     except Exception as e:
         print(f'An error occurred: {e}')
     finally:
-        server_socket.close()
+        router_socket.close()
         exit(0)
