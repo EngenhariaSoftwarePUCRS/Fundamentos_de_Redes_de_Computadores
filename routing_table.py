@@ -14,8 +14,8 @@ class RoutingTable:
         self.live_neighbours = {ip: False for ip in initial_neighbours}
     
     def register_route(self, ips: str, metric: int, output: str) -> None:
-        self.routes.append((ips, metric, output))
         self.live_neighbours[output] = False
+        self.routes.append((ips, metric, output))
     
     def get_route(self, ip: str) -> tuple[str, int] | None:
         """
@@ -35,6 +35,7 @@ class RoutingTable:
         return [route[0] for route in routes]
 
     def update_route(self, ip: str, metric: int, output: str) -> None:
+        self.live_neighbours[output] = False
         for i, route in enumerate(self.routes):
             if route[0] == ip:
                 self.routes[i] = (ip, metric, output)

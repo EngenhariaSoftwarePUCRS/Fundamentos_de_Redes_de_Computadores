@@ -36,7 +36,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
         if counter % 3 == 0:
             print_table(routing_table)
 
-        if counter == 15 or should_resend:
+        if counter % 15 == 0 or should_resend:
             print_route_send("Sending routing table to neighbours")
             for neighbour in routing_table.get_neighbours():
                 r_table = routing_table.serialize_routing_table_to_string()
