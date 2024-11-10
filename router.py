@@ -18,7 +18,7 @@ server_socket.settimeout(1)
 
 routing_table: RoutingTable
 
-should_resend: bool = False
+should_resend: bool
 
 
 def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
@@ -28,6 +28,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
 
     threading.Thread(target=user_input_thread, daemon=True).start()
 
+    global should_resend
     counter = 0
     while True:
         counter += 1
