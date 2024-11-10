@@ -11,7 +11,7 @@ class RoutingTable:
         self.self_ip = my_ip
         self.routes = [(ip, 1, my_ip) for ip in initial_neighbours]
     
-    def register_route(self, ips: str, metric: int, output: str):
+    def register_route(self, ips: str, metric: int, output: str) -> None:
         self.routes.append((ips, metric, output))
     
     def get_route(self, ip: str) -> tuple[str, int] | None:
@@ -31,13 +31,13 @@ class RoutingTable:
             routes = self.routes
         return [route[0] for route in routes]
 
-    def update_route(self, ip: str, metric: int, output: str):
+    def update_route(self, ip: str, metric: int, output: str) -> None:
         for i, route in enumerate(self.routes):
             if route[0] == ip:
                 self.routes[i] = (ip, metric, output)
                 break
 
-    def remove_route(self, ip: str): 
+    def remove_route(self, ip: str) -> None:
         self.routes = [route for route in self.routes if route[0] != ip]
 
     def order_ips(ips: list[str]) -> list[str]:
@@ -46,7 +46,7 @@ class RoutingTable:
     def serialize_routing_table_to_string(self) -> str:
         return "".join([f"@{route[0]}-{route[1]}" for route in self.routes])
 
-    def parse_string_to_routing_table(self, table_string: str):
+    def parse_string_to_routing_table(self, table_string: str) -> list[TableRow]:
         table_rows = re.split(r'@', table_string)
         table: list[TableRow] = []
         for row in table_rows[1:]:
@@ -54,13 +54,9 @@ class RoutingTable:
             table.append((ip, int(metric), None))
         return table
 
-    def print_routing_table(self):
+    def __str__(self) -> str:
         print("Destination\tMetric\tOutput")
+        as_str: str = ""
         for route in self.routes:
-            print(f"{route[0]}\t{route[1]}\t{route[2]}")
-
-    def send_routing_table_15seconds(self):
-        while True:
-            print("Sending routing table...")
-            self.print_routing_table()
-            time.sleep(15)
+            as_str += f"{route[0]}\t{route[1]}\t{route[2]}\n"
+        return as_str

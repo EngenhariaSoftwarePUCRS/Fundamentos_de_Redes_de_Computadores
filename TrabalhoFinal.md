@@ -1,10 +1,13 @@
 TODO:
 
 - [x] Criar um arquivo de configuração `roteadores.txt` para IPs iniciais
-- [N] Enviar sua tabela a cada 15s
+- [x] Apresentar periodicamente a tabela de roteamento para o usuário
+- [x] Enviar sua tabela a cada 15s
 - [x] Criar tabela de roteamento (Lógica)
   - [x] Deve ter campos de origem, destino e métrica
   - [x] Deve receber uma nova entrada (tabela) e, para cada rota
+    - [x] Se a rota for para o próprio roteador
+      - [x] deve ser ignorada
     - [x] Se a rota não existir
       - [x] deve ser adicionada
       - [x] a métrica incrementada em 1
@@ -16,7 +19,7 @@ TODO:
       - [x] deve ser removida
   - [x] Deve ter um método "print" que imprime a tabela para o usuário
   - [x] Deve ter um método "serialize" que converte a tabela em uma string para envio
-- [ ] (Optional) Criar classe para tratamento de mensagens
+- [ ] (Opcional) Criar classe para tratamento de mensagens
   - [ ] Deve possuir tres subclasses, uma para mensagens de roteamento, outra para mensagens de anuncio e outra para mensagens de texto
   - [ ] Deve ter um método "parse" que recebe uma mensagem e a transforma em um objeto
   - [ ] Deve ter um método "serialize" que transforma um objeto em uma mensagem

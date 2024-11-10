@@ -30,7 +30,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
         counter += 1
 
         if counter % 5 == 0:
-            routing_table.print_routing_table()
+            print(routing_table)
 
         if counter == 15:
             print("Sending routing table to neighbours")
