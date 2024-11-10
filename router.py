@@ -124,7 +124,8 @@ def handle_route(message: str, sender: Address):
             should_resend = True
         elif int(metric) < route_to_ip[1]:
             # If I already know how to get to this IP, update the metric if it is lower
-            routing_table.update_route(ip, int(metric), sender_ip)
+            metric = int(metric) + 1
+            routing_table.update_route(ip, metric, sender_ip)
             should_resend = True
 
     # Remove routes that are no longer received
