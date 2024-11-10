@@ -107,7 +107,9 @@ def handle_route(message: str, sender: Address):
         # Check if I already know how to get to this IP
         route_to_ip = routing_table.get_route(ip)
         sender_ip = sender[0]
-        if not route_to_ip and ip != routing_table.self_ip:
+        if ip == routing_table.self_ip:
+            pass
+        elif not route_to_ip:
             metric = int(metric) + 1
             routing_table.register_route(ip, metric, sender_ip)
         else:
