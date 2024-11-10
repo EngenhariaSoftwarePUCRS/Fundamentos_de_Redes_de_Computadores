@@ -21,7 +21,7 @@ routing_table: RoutingTable
 
 def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
     server_socket.bind((server_ip, server_port))
-    print(f'The server is ready to receive at {server_ip}:{server_port}')
+    print_ready(f'The server is ready to receive at {server_ip}:{server_port}')
     get_neighbours(server_ip, neighbours_file)
 
     threading.Thread(target=user_input_thread, daemon=True).start()
@@ -31,7 +31,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
         counter += 1
 
         if counter % 3 == 0:
-            print_table('magenta', routing_table)
+            print_table(routing_table)
 
         if counter == 15:
             print_route_send("Sending routing table to neighbours")

@@ -32,7 +32,7 @@ def print_waiting(*args, **kwargs):
 
 
 def print_route_send(*args, **kwargs):
-    print_('pink', *args, **kwargs)
+    print_('blue', *args, **kwargs)
 
 
 def print_kill_neighbours(*args, **kwargs):
