@@ -46,8 +46,11 @@ def handle_message(message: str, sender: Address):
     if len(message) == 0:
         return
 
+    if re.match(r"p", message):
+        routing_table.print_routing_table()
+
     if re.match(REGEX_TABLE_ANNOUNCEMENT, message):
-        register_route(message, sender)
+        handle_route(message, sender)
     
     # elif re.match(REGEX_ROUTER_ANNOUNCEMENT, message):
     #     register_router(message)
@@ -59,7 +62,7 @@ def handle_message(message: str, sender: Address):
         print(f'Invalid message: {message}')
 
 
-def register_route(message: str, sender: Address):
+def handle_route(message: str, sender: Address):
     table_row = re.split(r'@', message)
     for row in table_row[1:]:
         ip, metric = row.split('-')
@@ -73,6 +76,14 @@ def register_route(message: str, sender: Address):
             # If I already know how to get to this IP, update the metric if it is lower
             if int(metric) < route_to_ip[1]:
                 routing_table.update_route(ip, int(metric), sender_ip)
+
+    # Remove routes that are no longer received
+    known_ips = routing_table.get_ips_from_routes()
+    received_ips = routing_table.parse_string_to_routing_table(message)
+    received_ips = routing_table.get_ips_from_routes(received_ips)
+    routes_to_remove = set(known_ips) - set(received_ips)
+    for ip in routes_to_remove:
+        routing_table.remove_route(ip)
 
 
 def send_message(message: str, sender: Address):

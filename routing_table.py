@@ -1,3 +1,6 @@
+import re
+import time
+
 from config import TableRow
 
 class RoutingTable:
@@ -17,20 +20,33 @@ class RoutingTable:
                 return route[2], route[1]
         return None
     
+    def get_ips_from_routes(self, routes: list[TableRow] | None = None) -> list[str]:
+        if routes is None:
+            routes = self.routes
+        return [route[0] for route in routes]
+
     def update_route(self, ip: str, metric: int, output: str):
         for i, route in enumerate(self.routes):
             if route[0] == ip:
                 self.routes[i] = (ip, metric, output)
                 break
 
+    def remove_route(self, ip: str): 
+        self.routes = [route for route in self.routes if route[0] != ip]
+
+    def order_ips(ips: list[str]) -> list[str]:
+        return sorted(ips)
+
     def serialize_routing_table_to_string(self) -> str:
         return "\n".join([f""@"{route[0]},"-"{route[1]}" for route in self.routes])
-
-    # def parse_routing_table_from_string(self, table_string: str):
-    #     self.routes = []
-    #     for route in table_string.split("\n"):
-    #         ip, metric = route.split(",")
-    #         self.routes.append((ip, int(metric), None))
+    
+    def parse_string_to_routing_table(self, table_string: str):
+        table_rows = re.split(r'@', table_string)
+        table: list[TableRow] = []
+        for row in table_rows[1:]:
+            ip, metric = row.split('-')
+            table.append((ip, int(metric), None))
+        return table
 
     def print_routing_table(self):
         print("Destination\tMetric\tOutput")
