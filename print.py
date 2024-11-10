@@ -24,7 +24,7 @@ def print_ready(*args, **kwargs):
 
 
 def print_table(*args, **kwargs):
-    print_('magenta', *args, **kwargs)
+    print_('cyan', *args, **kwargs)
 
 
 def print_waiting(*args, **kwargs):
@@ -40,7 +40,7 @@ def print_kill_neighbours(*args, **kwargs):
 
 
 def print_message_received(*args, **kwargs):
-    print_('cyan', *args, **kwargs)
+    print_('magenta', *args, **kwargs)
 
 
 def print_(color: Literal['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white', 'reset', 'bold', 'underline', 'blink', 'reverse', 'concealed'], *args, **kwargs):
