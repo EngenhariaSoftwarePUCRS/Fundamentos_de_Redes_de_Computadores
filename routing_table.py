@@ -55,8 +55,7 @@ class RoutingTable:
         return table
 
     def __str__(self) -> str:
-        print("Destination\tMetric\tOutput")
-        as_str: str = ""
+        as_str: str = "Destination\tMetric\tOutput"
         for route in self.routes:
-            as_str += f"{route[0]}\t{route[1]}\t{route[2]}\n"
+            as_str += f"\n{route[0]}\t{route[1]}\t{route[2]}"
         return as_str
