@@ -44,7 +44,7 @@ class RoutingTable:
         return sorted(ips)
 
     def serialize_routing_table_to_string(self) -> str:
-        return "\n".join([f""@"{route[0]},"-"{route[1]}" for route in self.routes])
+        return "@".join([f"{route[0]}-{route[1]}" for route in self.routes])
     
     def parse_string_to_routing_table(self, table_string: str):
         table_rows = re.split(r'@', table_string)
