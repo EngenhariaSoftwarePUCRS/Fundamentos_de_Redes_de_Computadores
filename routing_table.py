@@ -11,6 +11,7 @@ class RoutingTable:
     def __init__(self, my_ip: str, initial_neighbours: list[str]):
         self.self_ip = my_ip
         self.routes = [(ip, 1, my_ip) for ip in initial_neighbours]
+        self.live_neighbours = {ip: False for ip in initial_neighbours}
     
     def register_route(self, ips: str, metric: int, output: str) -> None:
         self.routes.append((ips, metric, output))
