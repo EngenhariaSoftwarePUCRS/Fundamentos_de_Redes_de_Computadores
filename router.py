@@ -31,8 +31,6 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
     global should_resend
     counter = 0
     while True:
-        counter += 1
-
         if counter % 3 == 0:
             print_table(routing_table)
 
@@ -60,6 +58,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
             # If no message is received, pass
             pass
 
+        counter += 1
         time.sleep(1)
 
 
