@@ -130,22 +130,6 @@ def handle_route(message: str, sender: Address):
         routing_table.remove_route(ip)
 
 
-def send_message(message: str, sender: Address):
-    if message.startswith('@'):
-        nickname, message = message.split(' ', 1)
-        print(f'Sending private message to {nickname}')
-        for (nick, address) in neighbours:
-            if f"@{nick}" == nickname:
-                server_socket.sendto(message.encode(), address)
-                break
-    else:
-        for (nickname, address) in neighbours:
-            if address == sender:
-                continue
-            print(f'Sending message to {nickname}')
-            server_socket.sendto(message.encode(), address)
-
-
 if __name__ == '__main__':
     try:
         from sys import argv
