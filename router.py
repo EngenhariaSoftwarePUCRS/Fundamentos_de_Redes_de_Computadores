@@ -106,9 +106,7 @@ def handle_message(message: str, sender: Address):
         handle_route(message, sender)
     
     elif re.match(REGEX_ROUTER_ANNOUNCEMENT, message):
-        global router_ip
-        new_router_ip = message[1:]
-        routing_table.register_route(new_router_ip, 1, router_ip)
+        handle_new_router(message)
 
     # elif re.match(REGEX_MESSAGE, message):
     #     send_message(message)
@@ -149,6 +147,14 @@ def handle_route(message: str, sender: Address):
         for ip in routes_to_remove:
             routing_table.remove_route(ip)
         should_resend = True
+
+
+def handle_new_router(message: str):
+    global router_ip
+    new_router_ip = message[1:]
+    known_ips = routing_table.get_ips_from_routes()
+    if new_router_ip not in known_ips:
+        routing_table.register_route(new_router_ip, 1, router_ip)
 
 
 if __name__ == '__main__':

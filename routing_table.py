@@ -75,6 +75,8 @@ class RoutingTable:
         return table
 
     def __str__(self) -> str:
+        if not self.routes:
+            return "No routes"
         as_str: str = "Destination\tMetric\tOutput"
         for route in self.routes:
             as_str += f"\n{route[0]}\t{route[1]}\t{route[2]}"
