@@ -1,4 +1,5 @@
 import re
+import time
 from socket import socket, AF_INET, SOCK_DGRAM
 
 from config import (
@@ -11,21 +12,43 @@ from routing_table import RoutingTable
 
 
 server_socket = socket(AF_INET, SOCK_DGRAM)
-server_socket.bind((server_host_ip, server_port))
+server_socket.settimeout(1)
 
 routing_table: RoutingTable
 
 
-def main(neighbours_file: str):
-    print(f'The server is ready to receive at {server_host_ip}:{server_port}')
+def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
+    server_socket.bind((server_ip, server_port))
+    print(f'The server is ready to receive at {server_ip}:{server_port}')
     get_neighbours(neighbours_file)
 
+    counter = 0
     while True:
-        message, client = server_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
-        message = message.decode()
-        print(f'Received message: {message} from {client}')
+        counter += 1
 
-        handle_message(message, client)
+        if counter == 15:
+            print("Sending routing table to neighbours")
+            for neighbour in routing_table.get_neighbours():
+                r_table = routing_table.serialize_routing_table_to_string()
+                server_socket.sendto(r_table.encode(), (neighbour, server_port))
+            continue
+
+        if counter == 35:
+            print("35")
+            counter = 0
+            continue
+
+        try:
+            print('Waiting for messages...')
+            message, client = server_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
+            message = message.decode()
+            print(f'Received message: {message} from {client}')
+            handle_message(message, client)
+        except:
+            # If no message is received, pass
+            pass
+
+        time.sleep(1)
 
 
 def get_neighbours(neighbours_file: str):
@@ -105,8 +128,9 @@ def send_message(message: str, sender: Address):
 if __name__ == '__main__':
     try:
         from sys import argv
-        neighbours_file: str = argv[1] if len(argv) > 1 else 'roteadores.txt'
-        main(neighbours_file)
+        self_ip = argv[1] if len(argv) > 1 else server_host_ip
+        neighbours_file: str = argv[2] if len(argv) > 2 else 'roteadores.txt'
+        main(self_ip, neighbours_file)
     except KeyboardInterrupt:
         print('Server stopped')
     except Exception as e:

@@ -4,9 +4,11 @@ import time
 from config import TableRow
 
 class RoutingTable:
+    self_ip: str
     routes: list[TableRow]
 
     def __init__(self, my_ip: str, initial_neighbours: list[str]):
+        self.self_ip = my_ip
         self.routes = [(ip, 1, my_ip) for ip in initial_neighbours]
     
     def register_route(self, ips: str, metric: int, output: str):
@@ -19,6 +21,10 @@ class RoutingTable:
             if route[0] == ip:
                 return route[2], route[1]
         return None
+    
+    def get_neighbours(self) -> list[str]:
+        neighbours = [route[2] for route in self.routes]
+        return set(neighbours) - {self.self_ip}
     
     def get_ips_from_routes(self, routes: list[TableRow] | None = None) -> list[str]:
         if routes is None:
