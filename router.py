@@ -29,6 +29,9 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
     while True:
         counter += 1
 
+        if counter % 5 == 0:
+            routing_table.print_routing_table()
+
         if counter == 15:
             print("Sending routing table to neighbours")
             for neighbour in routing_table.get_neighbours():
@@ -84,9 +87,6 @@ def handle_message(message: str, sender: Address):
     if len(message) == 0:
         return
 
-    if re.match(r"p", message):
-        routing_table.print_routing_table()
-
     if re.match(REGEX_TABLE_ANNOUNCEMENT, message):
         handle_route(message, sender)
     
@@ -119,6 +119,7 @@ def handle_route(message: str, sender: Address):
     known_ips = routing_table.get_ips_from_routes()
     received_ips = routing_table.parse_string_to_routing_table(message)
     received_ips = routing_table.get_ips_from_routes(received_ips)
+    received_ips.append(sender[0])
     routes_to_remove = set(known_ips) - set(received_ips)
     for ip in routes_to_remove:
         routing_table.remove_route(ip)
