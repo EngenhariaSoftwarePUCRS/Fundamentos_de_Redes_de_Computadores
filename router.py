@@ -40,6 +40,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
             for neighbour in routing_table.get_neighbours():
                 r_table = routing_table.serialize_routing_table_to_string()
                 server_socket.sendto(r_table.encode(), (neighbour, server_port))
+            should_resend = False
             continue
 
         if counter == 35:
