@@ -9,6 +9,7 @@ from config import (
     Address,
     server_host_ip, server_port,
 )
+from print import *
 from routing_table import RoutingTable
 
 
@@ -30,26 +31,26 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
         counter += 1
 
         if counter % 3 == 0:
-            print(routing_table)
+            print_table('magenta', routing_table)
 
         if counter == 15:
-            print("Sending routing table to neighbours")
+            print_route_send("Sending routing table to neighbours")
             for neighbour in routing_table.get_neighbours():
                 r_table = routing_table.serialize_routing_table_to_string()
                 server_socket.sendto(r_table.encode(), (neighbour, server_port))
             continue
 
         if counter == 35:
-            # Check which neighbours are still alive
+            print_kill_neighbours('Checking which neighbours are still alive...')
             routing_table.remove_dead_neighbours()
             counter = 0
             continue
 
         try:
-            print('Waiting for messages...')
+            print_waiting('Waiting for messages...')
             message, client = server_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
             message = message.decode()
-            print(f'Received message: {message} from {client}')
+            print_message_received(f'Received message: {message} from {client}')
             handle_message(message, client)
         except:
             # If no message is received, pass
