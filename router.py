@@ -28,19 +28,20 @@ def main(router_ip: str, neighbours_file: str = 'roteadores.txt'):
 
     threading.Thread(target=user_input_thread, daemon=True).start()
 
+    enter_network(router_ip)
+
     global should_resend
     counter = 0
     while True:
         counter += 1
-        
+
         if counter % 3 == 0:
             print_table(routing_table)
 
         if counter % 15 == 0 or should_resend:
             print_route_send("Sending routing table to neighbours")
-            for neighbour in routing_table.get_neighbours():
-                r_table = routing_table.serialize_routing_table_to_string()
-                router_socket.sendto(r_table.encode(), (neighbour, router_port))
+            r_table = routing_table.serialize_routing_table_to_string()
+            routing_table.broadcast_message(r_table, router_socket)
             should_resend = False
             continue
 
@@ -87,6 +88,10 @@ def get_neighbours(self_ip: str, neighbours_file: str):
         raise FileNotFoundError(f'File {neighbours_file} not found')
     except Exception as e:
         raise Exception(f'An error occurred while reading the {neighbours_file} file: {e}')
+
+
+def enter_network(self_ip: str):
+    routing_table.broadcast_message(f"*{self_ip}", router_socket)
 
 
 def handle_message(message: str, sender: Address):

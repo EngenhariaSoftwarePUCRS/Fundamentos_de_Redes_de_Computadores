@@ -1,7 +1,7 @@
 import re
-import time
+from socket import socket
 
-from config import TableRow
+from config import TableRow, router_port
 
 class RoutingTable:
     self_ip: str
@@ -11,10 +11,9 @@ class RoutingTable:
     def __init__(self, my_ip: str, initial_neighbours: list[str]):
         self.self_ip = my_ip
         self.routes = [(ip, 1, my_ip) for ip in initial_neighbours]
-        self.live_neighbours = {ip: False for ip in initial_neighbours}
+        self.live_neighbours = {}
     
     def register_route(self, ip: str, metric: int, output: str) -> None:
-        self.live_neighbours[ip] = False
         self.routes.append((ip, metric, output))
     
     def get_route(self, ip: str) -> tuple[str, int] | None:
@@ -35,7 +34,6 @@ class RoutingTable:
         return [route[0] for route in routes]
 
     def update_route(self, ip: str, metric: int, output: str) -> None:
-        self.live_neighbours[output] = False
         for i, route in enumerate(self.routes):
             if route[0] == ip:
                 self.routes[i] = (ip, metric, output)
@@ -56,6 +54,11 @@ class RoutingTable:
         for neighbour in self.live_neighbours:
             if not self.live_neighbours[neighbour]:
                 self._remove_neighbour(neighbour)
+
+    def broadcast_message(self, message: str, socket: socket) -> None:
+        for neighbour in self.get_neighbours():
+            self.live_neighbours[neighbour] = False
+            socket.sendto(message.encode(), (neighbour, router_port))
 
     def order_ips(ips: list[str]) -> list[str]:
         return sorted(ips)
