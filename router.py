@@ -1,4 +1,5 @@
 import re
+import threading
 import time
 from socket import socket, AF_INET, SOCK_DGRAM
 
@@ -21,6 +22,8 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
     server_socket.bind((server_ip, server_port))
     print(f'The server is ready to receive at {server_ip}:{server_port}')
     get_neighbours(neighbours_file)
+
+    threading.Thread(target=user_input_thread, daemon=True).start()
 
     counter = 0
     while True:
@@ -49,6 +52,17 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
             pass
 
         time.sleep(1)
+
+
+def user_input_thread():
+    while True:
+        user_input = input("![YOUR_IP];[TARGET_IP];[MESSAGE]: ")
+        try:
+            ip, target_ip, message = user_input.split(';')
+            server_socket.sendto(message.encode(), (target_ip, server_port))
+            print(f'Message sent to {target_ip}')
+        except ValueError:
+            print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
 
 
 def get_neighbours(neighbours_file: str):
