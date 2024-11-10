@@ -18,7 +18,7 @@ server_socket.settimeout(1)
 
 routing_table: RoutingTable
 
-should_resend: bool
+should_resend: bool = False
 
 
 def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt'):
