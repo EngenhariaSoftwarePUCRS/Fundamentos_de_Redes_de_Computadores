@@ -56,9 +56,10 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
 
 def user_input_thread():
     while True:
-        user_input = input("![YOUR_IP];[TARGET_IP];[MESSAGE]: ")
+        # ![YOUR_IP];[TARGET_IP];[MESSAGE]:
+        user_input = input()
         try:
-            ip, target_ip, message = user_input.split(';')
+            _ip, target_ip, message = user_input.split(';')
             server_socket.sendto(message.encode(), (target_ip, server_port))
             print(f'Message sent to {target_ip}')
         except ValueError:

@@ -23,7 +23,7 @@ class RoutingTable:
         return None
     
     def get_neighbours(self) -> list[str]:
-        neighbours = [route[2] for route in self.routes]
+        neighbours = [route[0] for route in self.routes]
         return set(neighbours) - {self.self_ip}
     
     def get_ips_from_routes(self, routes: list[TableRow] | None = None) -> list[str]:
