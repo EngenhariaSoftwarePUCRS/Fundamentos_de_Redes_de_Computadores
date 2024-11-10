@@ -6,6 +6,7 @@ from config import TableRow
 class RoutingTable:
     self_ip: str
     routes: list[TableRow]
+    live_neighbours: dict[str, bool]
 
     def __init__(self, my_ip: str, initial_neighbours: list[str]):
         self.self_ip = my_ip
@@ -13,6 +14,7 @@ class RoutingTable:
     
     def register_route(self, ips: str, metric: int, output: str) -> None:
         self.routes.append((ips, metric, output))
+        self.live_neighbours[output] = False
     
     def get_route(self, ip: str) -> tuple[str, int] | None:
         """
@@ -39,6 +41,19 @@ class RoutingTable:
 
     def remove_route(self, ip: str) -> None:
         self.routes = [route for route in self.routes if route[0] != ip]
+    
+    def alive_neighbour(self, ip: str) -> None:
+        self.live_neighbours[ip] = True
+
+    def _remove_neighbour(self, ip: str) -> None:
+        for i, route in enumerate(self.routes):
+            if route[0] == ip or route[2] == ip:
+                self.routes.pop(i)
+
+    def remove_dead_neighbours(self) -> None:
+        for neighbour in self.live_neighbours:
+            if not self.live_neighbours[neighbour]:
+                self._remove_neighbour(neighbour)
 
     def order_ips(ips: list[str]) -> list[str]:
         return sorted(ips)

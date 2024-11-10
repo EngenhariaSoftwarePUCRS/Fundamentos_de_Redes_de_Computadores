@@ -29,7 +29,7 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
     while True:
         counter += 1
 
-        if counter % 5 == 0:
+        if counter % 3 == 0:
             print(routing_table)
 
         if counter == 15:
@@ -40,7 +40,8 @@ def main(server_ip: str = server_host_ip, neighbours_file: str = 'roteadores.txt
             continue
 
         if counter == 35:
-            print("35")
+            # Check which neighbours are still alive
+            routing_table.remove_dead_neighbours()
             counter = 0
             continue
 
@@ -84,6 +85,8 @@ def get_neighbours(self_ip: str, neighbours_file: str):
 
 
 def handle_message(message: str, sender: Address):
+    routing_table.alive_neighbour(sender[0])
+
     if len(message) == 0:
         return
 
