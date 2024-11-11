@@ -23,7 +23,7 @@ should_resend: bool = False
 
 
 def main(self_ip: str, neighbours_file: str):
-    global should_resend, router_ip
+    global router_ip, should_resend
     router_ip = self_ip
     router_socket.bind((router_ip, router_port))
     print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
@@ -33,6 +33,7 @@ def main(self_ip: str, neighbours_file: str):
     enter_network(router_ip)
 
     threading.Thread(target=user_input_thread, daemon=True).start()
+
     counter = 0
     while True:
         counter += 1
@@ -46,13 +47,13 @@ def main(self_ip: str, neighbours_file: str):
             routing_table.broadcast_message(r_table, router_socket)
             should_resend = False
             continue
-
+        
         if counter == 35:
             print_kill_neighbours('Checking which neighbours are still alive...')
             routing_table.remove_dead_neighbours()
             counter = 0
             continue
-
+        
         try:
             print_waiting('Waiting for messages...')
             message, client = router_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
@@ -62,20 +63,8 @@ def main(self_ip: str, neighbours_file: str):
         except:
             # If no message is received, pass
             pass
-
+        
         time.sleep(1)
-
-
-def user_input_thread():
-    while True:
-        # ![YOUR_IP];[TARGET_IP];[MESSAGE]:
-        user_input = input()
-        try:
-            _ip, target_ip, message = user_input.split(';')
-            router_socket.sendto(message.encode(), (target_ip, router_port))
-            print(f'Message sent to {target_ip}')
-        except ValueError:
-            print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
 
 
 def get_neighbours(self_ip: str, neighbours_file: str):
@@ -96,6 +85,18 @@ def enter_network(self_ip: str):
     routing_table.broadcast_message(f"*{self_ip}", router_socket)
 
 
+def user_input_thread():
+    while True:
+        # ![YOUR_IP];[TARGET_IP];[MESSAGE]:
+        user_input = input()
+        try:
+            _ip, target_ip, message = user_input.split(';')
+            router_socket.sendto(message.encode(), (target_ip, router_port))
+            print(f'Message sent to {target_ip}')
+        except ValueError:
+            print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
+
+
 def handle_message(message: str, sender: Address):
     routing_table.alive_neighbour(sender[0])
 
@@ -103,7 +104,7 @@ def handle_message(message: str, sender: Address):
         return
 
     if re.match(REGEX_TABLE_ANNOUNCEMENT, message):
-        handle_route(message, sender)
+        handle_table(message, sender)
     
     elif re.match(REGEX_ROUTER_ANNOUNCEMENT, message):
         handle_new_router(message)
@@ -115,7 +116,7 @@ def handle_message(message: str, sender: Address):
         print(f'Invalid message: {message}')
 
 
-def handle_route(message: str, sender: Address):
+def handle_table(message: str, sender: Address):
     global should_resend
     table_row = re.split(r'@', message)
     for row in table_row[1:]:
