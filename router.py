@@ -1,6 +1,7 @@
 import re
 import threading
 import time
+# For some unknown reason, the import of readline is necessary for the input to work as expected
 import readline
 from socket import socket, AF_INET, SOCK_DGRAM
 
@@ -87,16 +88,12 @@ def enter_network(self_ip: str):
 
 
 def user_input_thread():
-    def set_input_buffer(text):
-        readline.set_pre_input_hook(lambda: readline.insert_text(text))
-        readline.redisplay()
-
     while True:
         # ![YOUR_IP];[TARGET_IP];[MESSAGE]
         message = input()
 
         try:
-            print_send_message('Sending message to the network')
+            print_send_message(f'Sending message "{message}" to the network')
             routing_table.broadcast_message(message, router_socket)
         except ValueError:
             print_('red', 'Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
