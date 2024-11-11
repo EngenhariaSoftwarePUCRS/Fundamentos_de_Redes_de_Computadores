@@ -1,19 +1,12 @@
 {
     "configurations": [
         {
-            "name": "Debug: Router",
+            "name": "Debug",
             "type": "debugpy",
             "request": "launch",
             "program": "router.py",
             "console": "integratedTerminal",
             "args": ["${command:pickArgs}"]
-        },
-        {
-            "name": "Debug: Client",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "client.py",
-            "console": "integratedTerminal"
         }
     ]
 }
