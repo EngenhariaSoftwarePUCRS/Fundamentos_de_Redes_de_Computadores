@@ -182,7 +182,7 @@ def handle_text_message(message: str):
         print(f'Message received from {sender_ip}: {content}')
         return
 
-    next_hop, metric = route_to_ip[0]
+    next_hop, metric = route_to_ip
     print(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {metric}')
     if next_hop == router_ip:
         router_socket.sendto(message.encode(), (target_ip, router_port))
