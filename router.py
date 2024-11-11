@@ -171,16 +171,21 @@ def handle_new_router(message: str):
 
 
 def handle_text_message(message: str):
-    _sender_ip, target_ip, message = re.split(r';', message[1:])
+    sender_ip, target_ip, message = re.split(r';', message[1:])
     
     route_to_ip = routing_table.get_route(target_ip)
     if not route_to_ip:
         print(f'No route found to {target_ip}')
         return
     
-    next_hop = route_to_ip[2]
-    router_socket.sendto(f'{router_ip};{target_ip};{message}'.encode(), (next_hop, router_port))
-    print(f'Message sent to {target_ip}')
+    next_hop = route_to_ip[0]
+
+    if next_hop == router_ip:
+        print(f'Message received from {sender_ip}: {message}')
+        return
+
+    print(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {route_to_ip[1]}')
+    router_socket.sendto(f'!{router_ip};{target_ip};{message}'.encode(), (next_hop, router_port))
 
 
 if __name__ == '__main__':
