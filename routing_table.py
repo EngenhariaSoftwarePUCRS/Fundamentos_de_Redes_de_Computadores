@@ -12,7 +12,7 @@ class RoutingTable:
     def __init__(self, my_ip: str, initial_neighbours: list[str]):
         """Initializes the routing table with the given IP and neighbours."""
         self.self_ip = my_ip
-        self.routes = [(ip, 1, my_ip) for ip in initial_neighbours]
+        self.routes = [(ip, 1, ip) for ip in initial_neighbours]
         self.live_neighbours = {}
     
     def register_route(self, ip: str, metric: int, output: str) -> None:
