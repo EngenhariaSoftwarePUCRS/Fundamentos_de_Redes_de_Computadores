@@ -20,7 +20,7 @@ router_socket.settimeout(1)
 router_ip: str = default_router_ip
 routing_table: RoutingTable
 
-should_resend: bool = False
+should_resend: bool = True
 
 
 def main(self_ip: str, neighbours_file: str):
