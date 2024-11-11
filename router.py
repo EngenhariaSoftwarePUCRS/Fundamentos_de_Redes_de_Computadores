@@ -101,8 +101,8 @@ def user_input_thread():
 
         try:
             _ip, target_ip, message = user_input.split(';')
-            router_socket.sendto(message.encode(), (target_ip, router_port))
-            print(f'Message sent to {target_ip}')
+            print('Sending message to the network')
+            routing_table.broadcast_message(message, router_socket)
         except ValueError:
             print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
         
