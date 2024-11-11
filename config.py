@@ -1,7 +1,6 @@
 from typing import Tuple
 
 
-default_router_ip = '127.0.0.1'
 router_port = 9000
 
 default_neighbours_file = 'roteadores.txt'

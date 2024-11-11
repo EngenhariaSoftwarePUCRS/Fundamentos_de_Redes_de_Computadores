@@ -3,13 +3,13 @@ import threading
 import time
 # For some unknown reason, the import of readline is necessary for the input to work as expected
 import readline
-from socket import socket, AF_INET, SOCK_DGRAM
+from socket import gethostname, gethostbyname, socket, AF_INET, SOCK_DGRAM
 
 from config import (
     MESSAGE_MAX_SIZE_UDP,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
     Address,
-    default_router_ip, router_port, default_neighbours_file,
+    router_port, default_neighbours_file,
 )
 from print import *
 from routing_table import RoutingTable
@@ -18,21 +18,20 @@ from routing_table import RoutingTable
 router_socket = socket(AF_INET, SOCK_DGRAM)
 router_socket.settimeout(1)
 
-router_ip: str = default_router_ip
+router_ip: str = gethostbyname(gethostname())
 routing_table: RoutingTable
 
 should_resend: bool = True
 
 
-def main(self_ip: str, neighbours_file: str):
-    global router_ip, should_resend
-    router_ip = self_ip
+def main(neighbours_file: str):
+    global should_resend
     router_socket.bind((router_ip, router_port))
     print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
 
-    get_neighbours(router_ip, neighbours_file)
+    get_neighbours(neighbours_file)
 
-    enter_network(router_ip)
+    enter_network()
 
     threading.Thread(target=user_input_thread, daemon=True).start()
 
@@ -69,22 +68,23 @@ def main(self_ip: str, neighbours_file: str):
         time.sleep(1)
 
 
-def get_neighbours(self_ip: str, neighbours_file: str):
+def get_neighbours(neighbours_file: str):
     try:
         neighbour_ips = []
         with open(neighbours_file, 'r') as file:
             for line in file:
                 neighbour_ips.append(line.strip())
         global routing_table
-        routing_table = RoutingTable(self_ip, neighbour_ips)
+        routing_table = RoutingTable(router_ip, neighbour_ips)
     except FileNotFoundError:
         raise FileNotFoundError(f'File {neighbours_file} not found')
     except Exception as e:
         raise Exception(f'An error occurred while reading the {neighbours_file} file: {e}')
 
 
-def enter_network(self_ip: str):
-    routing_table.broadcast_message(f'*{self_ip}', router_socket)
+def enter_network():
+    # Should I send it to the broadcast address instead of only to known neighbours?
+    routing_table.broadcast_message(f'*{router_ip}', router_socket)
 
 
 def user_input_thread():
@@ -184,10 +184,11 @@ if __name__ == '__main__':
     try:
         from sys import argv
         if len(argv) <= 1:
-            raise ValueError('usage: python router.py <self_ipv4> [<neighbours_file>]')
-        self_ip = argv[1]
-        neighbours_file: str = argv[2] if len(argv) > 2 else default_neighbours_file
-        main(self_ip, neighbours_file)
+            print_('yellow', 'usage: python router.py [<neighbours_file>]')
+            neighbours_file = default_neighbours_file
+        else:
+            neighbours_file: str = argv[1]
+        main(neighbours_file)
     except KeyboardInterrupt:
         print_('green', 'Server stopped')
     except Exception as e:
