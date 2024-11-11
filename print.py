@@ -31,7 +31,7 @@ def print_waiting(*args, **kwargs):
     print_('yellow', *args, **kwargs)
 
 
-def print_route_send(*args, **kwargs):
+def print_send_message(*args, **kwargs):
     print_('blue', *args, **kwargs)
 
 

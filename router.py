@@ -43,7 +43,7 @@ def main(self_ip: str, neighbours_file: str):
             print_table(routing_table)
 
         if counter % 15 == 0 or should_resend:
-            print_route_send("Sending routing table to neighbours")
+            print_send_message('Sending routing table to neighbours')
             r_table = routing_table.serialize_routing_table_to_string()
             routing_table.broadcast_message(r_table, router_socket)
             should_resend = False
@@ -83,12 +83,11 @@ def get_neighbours(self_ip: str, neighbours_file: str):
 
 
 def enter_network(self_ip: str):
-    routing_table.broadcast_message(f"*{self_ip}", router_socket)
+    routing_table.broadcast_message(f'*{self_ip}', router_socket)
 
 
 def user_input_thread():
     def set_input_buffer(text):
-        """Set the initial input buffer to the given text."""
         readline.set_pre_input_hook(lambda: readline.insert_text(text))
         readline.redisplay()
 
@@ -100,13 +99,10 @@ def user_input_thread():
         set_input_buffer(None)
 
         try:
-            print('Sending message to the network')
+            print_send_message('Sending message to the network')
             routing_table.broadcast_message(message, router_socket)
         except ValueError:
-            print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
-        
-        # Set the input buffer to the previous input to retrieve it while typing
-        set_input_buffer(message)
+            print_('red', 'Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
 
 
 def handle_message(message: str, sender: Address):
@@ -125,7 +121,7 @@ def handle_message(message: str, sender: Address):
         handle_text_message(message)
 
     else:
-        print(f'Invalid message: {message}')
+        print_('red', f'Invalid message: {message}')
 
 
 def handle_table(message: str, sender: Address):
@@ -174,16 +170,16 @@ def handle_text_message(message: str):
     sender_ip, target_ip, content = re.split(r';', message[1:])
 
     if target_ip == router_ip:
-        print(f'Message received from {sender_ip}: {content}')
+        print_message_received(f'Message received from {sender_ip}: {content}')
         return
     
     route_to_ip = routing_table.get_route(target_ip)
     if not route_to_ip:
-        print(f'No route found to {target_ip}')
+        print_('red', f'No route found to {target_ip}')
         return
 
     next_hop, metric = route_to_ip
-    print(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {metric}')
+    print_send_message(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {metric}')
     if next_hop == router_ip:
         router_socket.sendto(message.encode(), (target_ip, router_port))
     else:
@@ -197,9 +193,9 @@ if __name__ == '__main__':
         neighbours_file: str = argv[2] if len(argv) > 2 else default_neighbours_file
         main(self_ip, neighbours_file)
     except KeyboardInterrupt:
-        print('Server stopped')
+        print_('green', 'Server stopped')
     except Exception as e:
-        print(f'An error occurred: {e}')
+        print_('red', f'An error occurred: {e}')
     finally:
         router_socket.close()
         exit(0)
