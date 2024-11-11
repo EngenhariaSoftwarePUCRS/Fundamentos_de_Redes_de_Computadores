@@ -177,13 +177,12 @@ def handle_text_message(message: str):
     if not route_to_ip:
         print(f'No route found to {target_ip}')
         return
-    
-    next_hop = route_to_ip[0]
 
-    if next_hop == router_ip:
+    if target_ip == router_ip:
         print(f'Message received from {sender_ip}: {content}')
         return
 
+    next_hop = route_to_ip[0]
     print(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {route_to_ip[1]}')
     router_socket.sendto(message.encode(), (next_hop, router_port))
 
