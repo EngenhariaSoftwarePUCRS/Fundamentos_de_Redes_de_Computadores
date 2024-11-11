@@ -183,7 +183,9 @@ def handle_text_message(message: str):
 if __name__ == '__main__':
     try:
         from sys import argv
-        self_ip = argv[1] if len(argv) > 1 else default_router_ip
+        if len(argv) <= 1:
+            raise ValueError('usage: python router.py <self_ipv4> [<neighbours_file>]')
+        self_ip = argv[1]
         neighbours_file: str = argv[2] if len(argv) > 2 else default_neighbours_file
         main(self_ip, neighbours_file)
     except KeyboardInterrupt:

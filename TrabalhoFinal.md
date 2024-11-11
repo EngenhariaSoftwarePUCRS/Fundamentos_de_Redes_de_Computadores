@@ -1,4 +1,47 @@
-TODO:
+# Trabalho Final - Troca de Tabelas de Roteamento
+
+## Integrantes
+- [Carolina Ferreira](https://github.com/carolmic)
+- [Felipe Freitas](https://github.com/felipefreitassilva)
+- [Mateus Caçabuena](https://github.com/mateuscacabuena)
+- [Nicholas Spolti](https://github.com/Nicholasspoltidesouza)
+
+## Como rodar
+
+### Requisitos
+
+- Python ^3
+- Readline (Windows)
+
+### Passos
+
+1. Clone o repositório
+```bash
+git clone https://github.com/EngenhariaSoftwarePUCRS/Fundamentos_de_Redes_de_Computadores.git
+```
+
+2. Instale as dependências (se estiver no windows)
+Sugere-se utilizar o conda como gerenciador de pacotes
+```bash
+pip install -r requirements.txt
+```
+
+1. Execute o arquivo `router.py` passando o IP do roteador e opcionalmente o arquivo de roteadores
+Exemplo:
+```bash
+python router.py 192.168.15.64
+```
+
+### Possíveis problemas
+
+- Verifique se a porta 9000 está liberada
+- Verifique se o arquivo `roteadores.txt` está correto e está na mesma pasta que o arquivo `router.py`
+- Verifique se o IP do roteador está correto
+- Verifique se o IP dos outros roteadores estão corretos
+- Verifique se é possível enviar um pacote para o IP dos outros roteadores
+- Verifique o firewall (é possível que ele esteja bloqueando a comunicação)
+
+## Features
 
 - [x] Criar um arquivo de configuração `roteadores.txt` para IPs iniciais
 - [x] Apresentar periodicamente a tabela de roteamento para o usuário
@@ -21,16 +64,9 @@ TODO:
   - [x] Deve ter um método "print" que imprime a tabela para o usuário
   - [x] Deve ter um método "serialize" que converte a tabela em uma string para envio
 - [x] Remover rotas inativos (a cada 35s)
-- [ ] Deve ser capaz de enviar mensagens de texto
-- [ ] Deve ser capaz de receber mensagens de texto
-  - [ ] Se a mensagem for para si, deve-se imprimir o texto
-  - [ ] Se a mensagem for para outro roteador, deve-se encaminhar a mensagem para o próximo roteador ou para o destino final
-  - [ ] Se a mensagem for para um roteador inexistente, deve-se informar o usuário
-- [ ] (Opcional) Criar classe para tratamento de mensagens
-  - [ ] Deve possuir tres subclasses, uma para mensagens de roteamento, outra para mensagens de anuncio e outra para mensagens de texto
-  - [ ] Deve ter um método "parse" que recebe uma mensagem e a transforma em um objeto
-  - [ ] Deve ter um método "serialize" que transforma um objeto em uma mensagem
-  - [ ] Mensagens de roteamento devem estar no formato "@[destino]-[metrica]"
-  - [ ] Mensagens de anúncio devem estar no formato "*[origem]"
-  - [ ] Mensagens de texto devem estar no formato "![origem];[destino];[texto]"
+- [x] Deve ser capaz de enviar mensagens de texto
+- [x] Deve ser capaz de receber mensagens de texto
+  - [x] Se a mensagem for para si, deve-se imprimir o texto
+  - [x] Se a mensagem for para outro roteador, deve-se encaminhar a mensagem para o próximo roteador ou para o destino final
+  - [x] Se a mensagem for para um roteador inexistente, deve-se informar o usuário
 - [x] Utilizar socket UDP na porta 9000
