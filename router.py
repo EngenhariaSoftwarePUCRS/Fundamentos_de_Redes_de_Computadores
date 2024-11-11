@@ -94,9 +94,6 @@ def user_input_thread():
     while True:
         # ![YOUR_IP];[TARGET_IP];[MESSAGE]
         message = input()
-        
-        # After pressing Enter, clear the pre-input hook
-        set_input_buffer(None)
 
         try:
             print_send_message('Sending message to the network')
