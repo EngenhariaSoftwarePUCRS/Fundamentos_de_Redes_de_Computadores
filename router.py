@@ -172,14 +172,14 @@ def handle_new_router(message: str):
 
 def handle_text_message(message: str):
     sender_ip, target_ip, content = re.split(r';', message[1:])
+
+    if target_ip == router_ip:
+        print(f'Message received from {sender_ip}: {content}')
+        return
     
     route_to_ip = routing_table.get_route(target_ip)
     if not route_to_ip:
         print(f'No route found to {target_ip}')
-        return
-
-    if target_ip == router_ip:
-        print(f'Message received from {sender_ip}: {content}')
         return
 
     next_hop, metric = route_to_ip
