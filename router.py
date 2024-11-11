@@ -1,6 +1,7 @@
 import re
 import threading
 import time
+import readline
 from socket import socket, AF_INET, SOCK_DGRAM
 
 from config import (
@@ -86,15 +87,27 @@ def enter_network(self_ip: str):
 
 
 def user_input_thread():
+    def set_input_buffer(text):
+        """Set the initial input buffer to the given text."""
+        readline.set_pre_input_hook(lambda: readline.insert_text(text))
+        readline.redisplay()
+
     while True:
-        # ![YOUR_IP];[TARGET_IP];[MESSAGE]:
+        # ![YOUR_IP];[TARGET_IP];[MESSAGE]
         user_input = input()
+        
+        # After pressing Enter, clear the pre-input hook
+        set_input_buffer(None)
+
         try:
             _ip, target_ip, message = user_input.split(';')
             router_socket.sendto(message.encode(), (target_ip, router_port))
             print(f'Message sent to {target_ip}')
         except ValueError:
             print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
+        
+        # Set the input buffer to the previous input to retrieve it while typing
+        set_input_buffer(user_input)
 
 
 def handle_message(message: str, sender: Address):
@@ -109,8 +122,8 @@ def handle_message(message: str, sender: Address):
     elif re.match(REGEX_ROUTER_ANNOUNCEMENT, message):
         handle_new_router(message)
 
-    # elif re.match(REGEX_MESSAGE, message):
-    #     send_message(message)
+    elif re.match(REGEX_MESSAGE, message):
+        handle_text_message(message)
 
     else:
         print(f'Invalid message: {message}')
@@ -156,6 +169,19 @@ def handle_new_router(message: str):
     known_ips = routing_table.get_ips_from_routes()
     if new_router_ip not in known_ips:
         routing_table.register_route(new_router_ip, 1, router_ip)
+
+
+def handle_text_message(message: str):
+    _sender_ip, target_ip, message = re.split(r';', message[1:])
+    
+    route_to_ip = routing_table.get_route(target_ip)
+    if not route_to_ip:
+        print(f'No route found to {target_ip}')
+        return
+    
+    next_hop = route_to_ip[2]
+    router_socket.sendto(f'{router_ip};{target_ip};{message}'.encode(), (next_hop, router_port))
+    print(f'Message sent to {target_ip}')
 
 
 if __name__ == '__main__':

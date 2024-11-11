@@ -21,6 +21,11 @@ TODO:
   - [x] Deve ter um método "print" que imprime a tabela para o usuário
   - [x] Deve ter um método "serialize" que converte a tabela em uma string para envio
 - [x] Remover rotas inativos (a cada 35s)
+- [ ] Deve ser capaz de enviar mensagens de texto
+- [ ] Deve ser capaz de receber mensagens de texto
+  - [ ] Se a mensagem for para si, deve-se imprimir o texto
+  - [ ] Se a mensagem for para outro roteador, deve-se encaminhar a mensagem para o próximo roteador ou para o destino final
+  - [ ] Se a mensagem for para um roteador inexistente, deve-se informar o usuário
 - [ ] (Opcional) Criar classe para tratamento de mensagens
   - [ ] Deve possuir tres subclasses, uma para mensagens de roteamento, outra para mensagens de anuncio e outra para mensagens de texto
   - [ ] Deve ter um método "parse" que recebe uma mensagem e a transforma em um objeto

@@ -1,0 +1,2 @@
+# Windows
+pyreadline3==3.5.4; platform_system == "Windows"
