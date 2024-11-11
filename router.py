@@ -120,6 +120,7 @@ def handle_message(message: str, sender: Address):
 
 def handle_table(message: str, sender: Address):
     global should_resend
+    message += f"@{sender[0]}-{1}"
     table_row = re.split(r'@', message)
     for row in table_row[1:]:
         ip, metric = row.split('-')
@@ -144,7 +145,6 @@ def handle_table(message: str, sender: Address):
     known_ips = routing_table.get_ips_from_routes()
     received_ips = routing_table.parse_string_to_routing_table(message)
     received_ips = routing_table.get_ips_from_routes(received_ips)
-    received_ips.append(sender[0])
     routes_to_remove = set(known_ips) - set(received_ips)
     if routes_to_remove:
         for ip in routes_to_remove:
