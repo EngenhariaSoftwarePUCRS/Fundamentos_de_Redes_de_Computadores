@@ -94,20 +94,19 @@ def user_input_thread():
 
     while True:
         # ![YOUR_IP];[TARGET_IP];[MESSAGE]
-        user_input = input()
+        message = input()
         
         # After pressing Enter, clear the pre-input hook
         set_input_buffer(None)
 
         try:
-            _ip, target_ip, message = user_input.split(';')
             print('Sending message to the network')
             routing_table.broadcast_message(message, router_socket)
         except ValueError:
             print('Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
         
         # Set the input buffer to the previous input to retrieve it while typing
-        set_input_buffer(user_input)
+        set_input_buffer(message)
 
 
 def handle_message(message: str, sender: Address):
