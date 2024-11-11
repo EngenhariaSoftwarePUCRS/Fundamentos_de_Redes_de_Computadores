@@ -1,6 +1,7 @@
 # Trabalho Final - Troca de Tabelas de Roteamento
 
 ## Integrantes
+
 - [Carolina Ferreira](https://github.com/carolmic)
 - [Felipe Freitas](https://github.com/felipefreitassilva)
 - [Mateus Caçabuena](https://github.com/mateuscacabuena)
@@ -26,10 +27,10 @@ Sugere-se utilizar o conda como gerenciador de pacotes
 pip install -r requirements.txt
 ```
 
-1. Execute o arquivo `router.py` passando o IP do roteador e opcionalmente o arquivo de roteadores
+1. Execute o arquivo `router.py` passando opcionalmente o arquivo de roteadores
 Exemplo:
 ```bash
-python router.py 192.168.15.64
+python router.py roteadores.txt
 ```
 
 ### Possíveis problemas
@@ -38,7 +39,7 @@ python router.py 192.168.15.64
 - Verifique se o arquivo `roteadores.txt` está correto e está na mesma pasta que o arquivo `router.py`
 - Verifique se o IP do roteador está correto
 - Verifique se o IP dos outros roteadores estão corretos
-- Verifique se é possível enviar um pacote para o IP dos outros roteadores
+- Verifique se é possível enviar um pacote para o IP dos outros roteadores (ping)
 - Verifique o firewall (é possível que ele esteja bloqueando a comunicação)
 
 ## Features
