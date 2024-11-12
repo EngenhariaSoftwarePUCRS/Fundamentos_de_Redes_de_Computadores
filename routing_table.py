@@ -63,13 +63,12 @@ class RoutingTable:
 
     def remove_dead_acquantainces(self, current_timestamp: int, threshhold: int) -> bool:
         """Removes all acquantainces that have not interacted in the last threshhold seconds. Returns True if any were removed."""
-        removed = False
+        removed = []
         for acquantaince, last_interaction in self.acquantainces_last_interaction.items():
             if current_timestamp - last_interaction >= threshhold:
                 self._remove_acquantaince(acquantaince)
-                self.acquantainces_last_interaction.pop(acquantaince)
-                removed = True
-        return removed
+                removed.append(acquantaince)
+        return len(removed) > 0
 
     def broadcast_message_neighbours(self, message: str, socket: socket) -> None:
         """Sends the given message to all neighbours (only directly connected)."""
