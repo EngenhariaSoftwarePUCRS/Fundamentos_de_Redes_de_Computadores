@@ -7,7 +7,7 @@ from socket import gethostname, gethostbyname, socket, AF_INET, SOCK_DGRAM
 
 from config import (
     MESSAGE_MAX_SIZE_UDP,
-    INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_CHECK_ALIVE,
+    INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_STEP, CHECK_ALIVE_THRESHOLD,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
     Address,
     router_port, default_neighbours_file,
@@ -17,56 +17,48 @@ from routing_table import RoutingTable
 
 
 router_socket = socket(AF_INET, SOCK_DGRAM)
-router_socket.settimeout(1)
+
+send_table_awake = threading.Event()
 
 router_ip: str
 routing_table: RoutingTable
 
-should_resend: bool = True
+counter: int = 0
 
 
 def main(neighbours_file: str):
-    global should_resend
     router_socket.bind((router_ip, router_port))
-    print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
+
+    print_header()
 
     get_neighbours(neighbours_file)
 
     enter_network()
 
+    threading.Thread(target=print_table_thread, daemon=True).start()
+    time.sleep(0.25)
+    threading.Thread(target=send_table_thread, daemon=True).start()
+    time.sleep(0.25)
+    threading.Thread(target=receive_messages_thread, daemon=True).start()
+    time.sleep(0.25)
     threading.Thread(target=user_input_thread, daemon=True).start()
+    time.sleep(0.25)
+    threading.Thread(target=remove_dead_acquantainces_thread, daemon=True).start()
 
-    counter = 0
+    global counter
     while True:
-        counter += 1
+        counter += INTERVAL_STEP
+        time.sleep(INTERVAL_STEP)
 
-        if counter % INTERVAL_DISPLAY_TABLE == 0:
-            print_table(routing_table)
 
-        if counter % INTERVAL_SEND_TABLE == 0 or should_resend:
-            print_send_message('Sending routing table to neighbours')
-            r_table = routing_table.serialize_routing_table_to_string()
-            routing_table.broadcast_message_neighbours(r_table, router_socket)
-            should_resend = False
-            continue
-        
-        if counter % INTERVAL_CHECK_ALIVE == 0:
-            print_kill_acquantainces('Checking which neighbours are still alive...')
-            routing_table.remove_dead_acquantainces(counter, INTERVAL_CHECK_ALIVE)
-            continue
-        
-        try:
-            print_waiting('Waiting for messages...')
-            message, client = router_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
-            message = message.decode()
-            routing_table.alive_acquantaince(client[0], counter)
-            print_message_received(f'Received message: {message} from {client}')
-            handle_message(message, client)
-        except:
-            # If no message is received, pass
-            pass
-        
-        time.sleep(1)
+def print_header():
+    print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
+    print()
+    print_table("Table")
+    print_message_received("Messages received")
+    print_send_message("Messages sent")
+    print_waiting("Waiting for messages")
+    print()
 
 
 def get_neighbours(neighbours_file: str):
@@ -87,6 +79,43 @@ def enter_network():
     routing_table.broadcast_message_neighbours(f'*{router_ip}', router_socket)
 
 
+def print_table_thread():
+    while True:
+        print()
+        print_table("=" * 10 + " ROUTING TABLE " + "=" * 10)
+        print_table(routing_table)
+        time.sleep(INTERVAL_DISPLAY_TABLE)
+
+
+def send_table_thread():
+    while True:
+        print_send_message('Sending routing table to neighbours')
+        r_table = routing_table.serialize_routing_table_to_string()
+        routing_table.broadcast_message_neighbours(r_table, router_socket)
+        send_table_awake.wait(INTERVAL_SEND_TABLE)
+        send_table_awake.clear()
+
+
+def send_table_immediately():
+    send_table_awake.set()
+    
+
+def receive_messages_thread():
+    while True:
+        try:
+            print_waiting('Waiting for messages...')
+            message, client = router_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
+            message = message.decode()
+            routing_table.alive_acquantaince(client[0], counter)
+            print_message_received(f'Received message: {message} from {client}')
+            handle_message(message, client)
+        except ConnectionResetError:
+            pass
+        except Exception as e:
+            print_('red', f'An error occurred while receiving messages: {e}')
+        time.sleep(INTERVAL_STEP)
+
+
 def user_input_thread():
     while True:
         # ![YOUR_IP];[TARGET_IP];[MESSAGE]
@@ -97,6 +126,15 @@ def user_input_thread():
             routing_table.broadcast_message_acquantainces(message, router_socket)
         except ValueError:
             print_('red', 'Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
+
+
+def remove_dead_acquantainces_thread():
+    global counter
+    while True:
+        removed_acquantainces = routing_table.remove_dead_acquantainces(counter, CHECK_ALIVE_THRESHOLD)
+        if removed_acquantainces:
+            print_kill_acquantainces('Checking which neighbours are still alive...')
+        time.sleep(INTERVAL_STEP)
 
 
 def handle_message(message: str, sender: Address):
@@ -117,7 +155,6 @@ def handle_message(message: str, sender: Address):
 
 
 def handle_table(message: str, sender: Address):
-    global should_resend
     message += f"@{sender[0]}-{1}"
     table_row = re.split(r'@', message)
     for row in table_row[1:]:
@@ -130,14 +167,14 @@ def handle_table(message: str, sender: Address):
         elif not route_to_ip:
             metric = int(metric) + 1
             routing_table.register_route(ip, metric, sender_ip)
-            should_resend = True
+            send_table_immediately()
         else:
             old_metric = route_to_ip[1]
             new_metric = int(metric) + 1
             if new_metric < old_metric:
                 # If I already know how to get to this IP, update the metric if it is lower
                 routing_table.update_route(ip, new_metric, sender_ip)
-                should_resend = True
+                send_table_immediately()
 
     # Remove routes that are no longer received
     known_acquantaince_ips = routing_table.get_acquantainces()
@@ -148,7 +185,7 @@ def handle_table(message: str, sender: Address):
     if routes_to_remove:
         for ip in routes_to_remove:
             routing_table.remove_route(ip)
-        should_resend = True
+        send_table_immediately()
 
 
 def handle_new_router(message: str):
@@ -158,8 +195,7 @@ def handle_new_router(message: str):
     if new_router_ip not in known_ips:
         routing_table.register_route(new_router_ip, 1, router_ip)
         routing_table.alive_acquantaince(new_router_ip)
-        global should_resend
-        should_resend = True
+        send_table_immediately()
 
 
 def handle_text_message(message: str):

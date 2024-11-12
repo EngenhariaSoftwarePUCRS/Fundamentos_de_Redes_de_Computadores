@@ -28,19 +28,19 @@ def print_table(*args, **kwargs):
 
 
 def print_waiting(*args, **kwargs):
-    print_('yellow', *args, **kwargs)
+    print_('yellow', '\t' * 12, *args, **kwargs)
 
 
 def print_send_message(*args, **kwargs):
-    print_('blue', *args, **kwargs)
+    print_('blue', '\t' * 8, *args, **kwargs)
 
 
 def print_kill_acquantainces(*args, **kwargs):
-    print_('red', *args, **kwargs)
+    print_('red', '\t' * 8, *args, **kwargs)
 
 
 def print_message_received(*args, **kwargs):
-    print_('magenta', *args, **kwargs)
+    print_('magenta', '\t' * 4, *args, **kwargs)
 
 
 def print_(color: Literal['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white', 'reset', 'bold', 'underline', 'blink', 'reverse', 'concealed'], *args, **kwargs):
