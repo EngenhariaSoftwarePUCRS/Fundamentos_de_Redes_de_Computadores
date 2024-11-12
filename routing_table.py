@@ -68,6 +68,10 @@ class RoutingTable:
             if current_timestamp - last_interaction >= threshhold:
                 self._remove_acquantaince(acquantaince)
                 removed.append(acquantaince)
+        self.acquantainces_last_interaction = {
+            ip: last_interaction for ip, last_interaction
+                in self.acquantainces_last_interaction.items()
+                    if ip not in removed }
         return len(removed) > 0
 
     def broadcast_message_neighbours(self, message: str, socket: socket) -> None:

@@ -7,7 +7,7 @@ from socket import gethostname, gethostbyname, socket, AF_INET, SOCK_DGRAM
 
 from config import (
     MESSAGE_MAX_SIZE_UDP,
-    INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_STEP, CHECK_ALIVE_THRESHOLD,
+    INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_RESET_SOCKET, INTERVAL_STEP, CHECK_ALIVE_THRESHOLD,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
     Address,
     router_port, default_neighbours_file,
@@ -17,8 +17,10 @@ from routing_table import RoutingTable
 
 
 router_socket = socket(AF_INET, SOCK_DGRAM)
+router_socket.settimeout(INTERVAL_RESET_SOCKET)
 
 send_table_awake = threading.Event()
+stop_threads = threading.Event()
 
 router_ip: str
 routing_table: RoutingTable
@@ -35,20 +37,31 @@ def main(neighbours_file: str):
 
     enter_network()
 
-    threading.Thread(target=print_table_thread, daemon=True).start()
-    time.sleep(0.25)
-    threading.Thread(target=send_table_thread, daemon=True).start()
-    time.sleep(0.25)
-    threading.Thread(target=receive_messages_thread, daemon=True).start()
-    time.sleep(0.25)
-    threading.Thread(target=user_input_thread, daemon=True).start()
-    time.sleep(0.25)
-    threading.Thread(target=remove_dead_acquantainces_thread, daemon=True).start()
+    threads = [
+        threading.Thread(target=print_table_thread, daemon=True),
+        threading.Thread(target=send_table_thread, daemon=True),
+        threading.Thread(target=receive_messages_thread, daemon=True),
+        threading.Thread(target=user_input_thread, daemon=True),
+        threading.Thread(target=remove_dead_acquantainces_thread, daemon=True),
+    ]
+    for thread in threads:
+        thread.start()
+        time.sleep(1 / len(threads))
 
     global counter
-    while True:
-        counter += INTERVAL_STEP
-        time.sleep(INTERVAL_STEP)
+    try:
+        while not stop_threads.is_set():
+            counter += INTERVAL_STEP
+            time.sleep(INTERVAL_STEP)
+    except KeyboardInterrupt:
+        stop_threads.set()
+        print_('yellow', 'Stopping threads, please type "Enter" to stop input thread and wait a few seconds...')
+    finally:
+        for thread in threads:
+            print_('yellow', f'Stopping thread {thread.name}...')
+            thread.join()
+        print_('green', f'{len(threads)} threads stopped successfully')
+        router_socket.close()
 
 
 def print_header():
@@ -80,7 +93,7 @@ def enter_network():
 
 
 def print_table_thread():
-    while True:
+    while not stop_threads.is_set():
         print()
         print_table("=" * 10 + " ROUTING TABLE " + "=" * 10)
         print_table(routing_table)
@@ -88,7 +101,7 @@ def print_table_thread():
 
 
 def send_table_thread():
-    while True:
+    while not stop_threads.is_set():
         print_send_message('Sending routing table to neighbours')
         r_table = routing_table.serialize_routing_table_to_string()
         routing_table.broadcast_message_neighbours(r_table, router_socket)
@@ -101,7 +114,7 @@ def send_table_immediately():
     
 
 def receive_messages_thread():
-    while True:
+    while not stop_threads.is_set():
         try:
             print_waiting('Waiting for messages...')
             message, client = router_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
@@ -111,13 +124,21 @@ def receive_messages_thread():
             handle_message(message, client)
         except ConnectionResetError:
             pass
+        except TimeoutError:
+            pass
+        except KeyboardInterrupt:
+            break
+        except OSError as e:
+            if e.errno == 10038:
+                break
+            raise e
         except Exception as e:
             print_('red', f'An error occurred while receiving messages: {e}')
         time.sleep(INTERVAL_STEP)
 
 
 def user_input_thread():
-    while True:
+    while not stop_threads.is_set():
         # ![YOUR_IP];[TARGET_IP];[MESSAGE]
         message = input()
 
@@ -130,7 +151,7 @@ def user_input_thread():
 
 def remove_dead_acquantainces_thread():
     global counter
-    while True:
+    while not stop_threads.is_set():
         removed_acquantainces = routing_table.remove_dead_acquantainces(counter, CHECK_ALIVE_THRESHOLD)
         if removed_acquantainces:
             print_kill_acquantainces('Checking which neighbours are still alive...')
@@ -180,6 +201,7 @@ def handle_table(message: str, sender: Address):
     known_acquantaince_ips = routing_table.get_acquantainces()
     known_neighbour_ips = routing_table.get_neighbours()
     received_ips = routing_table.parse_string_to_routing_table(message)
+    received_ips = routing_table.get_acquantainces(received_ips)
     indirect_neighbours = set(known_acquantaince_ips) - set(known_neighbour_ips)
     routes_to_remove = indirect_neighbours - set(received_ips)
     if routes_to_remove:
@@ -226,7 +248,7 @@ if __name__ == '__main__':
         router_ip = argv[2] if len(argv) > 2 else gethostbyname(gethostname())
         main(neighbours_file)
     except KeyboardInterrupt:
-        print_('green', 'Server stopped')
+        print_('green', 'Server stopping...')
     except Exception as e:
         print_('red', f'An error occurred: {e}')
     finally:
