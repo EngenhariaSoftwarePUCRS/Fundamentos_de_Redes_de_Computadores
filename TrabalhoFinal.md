@@ -27,10 +27,10 @@ Sugere-se utilizar o conda como gerenciador de pacotes
 pip install -r requirements.txt
 ```
 
-1. Execute o arquivo `router.py` passando opcionalmente o arquivo de roteadores e o IP local (que deveriam ser automaticamente detectados)
+1. Execute o arquivo `router.py` passando opcionalmente o arquivo de roteadores, o IP local e o arquivo desejado de log (que deveriam ser automaticamente detectados)
 Exemplo:
 ```bash
-python router.py roteadores.txt 192.168.15.64
+python router.py roteadores.txt 192.168.15.64 log.txt
 ```
 
 ### Possíveis problemas

@@ -9,8 +9,7 @@ from config import (
     MESSAGE_MAX_SIZE_UDP,
     INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_RESET_SOCKET, INTERVAL_STEP, CHECK_ALIVE_THRESHOLD,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
-    Address,
-    router_port, default_neighbours_file,
+    Address, router_port, default_neighbours_file,
 )
 from print import *
 from routing_table import RoutingTable
@@ -66,12 +65,12 @@ def main(neighbours_file: str):
 
 def print_header():
     print_ready(f'The server is ready to receive at {router_ip}:{router_port}')
-    print()
+    print_('white')
     print_table("Table")
     print_message_received("Messages received")
     print_send_message("Messages sent")
     print_waiting("Waiting for messages")
-    print()
+    print_('white')
 
 
 def get_neighbours(neighbours_file: str):
@@ -94,9 +93,9 @@ def enter_network():
 
 def print_table_thread():
     while not stop_threads.is_set():
-        print()
+        print_('white')
         print_table("=" * 10 + " ROUTING TABLE " + "=" * 10)
-        print_table(routing_table)
+        print_table(routing_table.__str__())
         time.sleep(INTERVAL_DISPLAY_TABLE)
 
 
@@ -241,11 +240,14 @@ def handle_text_message(message: str):
 
 
 if __name__ == '__main__':
-    print_('yellow', 'usage: python router.py [<neighbours_file>] [<router_ip>]')
     try:
         from sys import argv
+        if len(argv) < 4:
+            print_('yellow', 'usage: python router.py [<neighbours_file>] [<router_ip>] [<log_file>]', log=False)
         neighbours_file = argv[1] if len(argv) > 1 else default_neighbours_file
         router_ip = argv[2] if len(argv) > 2 else gethostbyname(gethostname())
+        if len(argv) > 3:
+            set_log_file(argv[3])
         main(neighbours_file)
     except KeyboardInterrupt:
         print_('green', 'Server stopping...')

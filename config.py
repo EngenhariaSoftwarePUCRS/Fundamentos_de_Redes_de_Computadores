@@ -4,6 +4,7 @@ from typing import Tuple
 router_port = 9000
 
 default_neighbours_file = 'roteadores.txt'
+default_log_file = 'log.txt'
 
 MESSAGE_MAX_SIZE_UDP = 1024
 
