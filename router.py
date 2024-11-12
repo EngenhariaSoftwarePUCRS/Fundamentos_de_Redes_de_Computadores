@@ -158,6 +158,7 @@ def handle_new_router(message: str):
     known_ips = routing_table.get_ips_from_routes()
     if new_router_ip not in known_ips:
         routing_table.register_route(new_router_ip, 1, router_ip)
+        routing_table.alive_neighbour(new_router_ip)
         global should_resend
         should_resend = True
 
