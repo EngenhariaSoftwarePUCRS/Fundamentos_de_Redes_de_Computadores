@@ -35,7 +35,7 @@ def print_send_message(*args, **kwargs):
     print_('blue', *args, **kwargs)
 
 
-def print_kill_neighbours(*args, **kwargs):
+def print_kill_acquantainces(*args, **kwargs):
     print_('red', *args, **kwargs)
 
 

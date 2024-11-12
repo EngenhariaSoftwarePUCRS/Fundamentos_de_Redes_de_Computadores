@@ -45,13 +45,13 @@ def main(neighbours_file: str):
         if counter % 15 == 0 or should_resend:
             print_send_message('Sending routing table to neighbours')
             r_table = routing_table.serialize_routing_table_to_string()
-            routing_table.broadcast_message(r_table, router_socket)
+            routing_table.broadcast_message_neighbours(r_table, router_socket)
             should_resend = False
             continue
         
         if counter == 35:
-            print_kill_neighbours('Checking which neighbours are still alive...')
-            routing_table.remove_dead_neighbours()
+            print_kill_acquantainces('Checking which neighbours are still alive...')
+            routing_table.remove_dead_acquantainces()
             counter = 0
             continue
         
@@ -83,8 +83,7 @@ def get_neighbours(neighbours_file: str):
 
 
 def enter_network():
-    # Should I send it to the broadcast address instead of only to known neighbours?
-    routing_table.broadcast_message(f'*{router_ip}', router_socket)
+    routing_table.broadcast_message_neighbours(f'*{router_ip}', router_socket)
 
 
 def user_input_thread():
@@ -94,13 +93,13 @@ def user_input_thread():
 
         try:
             print_send_message(f'Sending message "{message}" to the network')
-            routing_table.broadcast_message(message, router_socket)
+            routing_table.broadcast_message_acquantainces(message, router_socket)
         except ValueError:
             print_('red', 'Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
 
 
 def handle_message(message: str, sender: Address):
-    routing_table.alive_neighbour(sender[0])
+    routing_table.alive_acquantaince(sender[0])
 
     if len(message) == 0:
         return
@@ -142,10 +141,10 @@ def handle_table(message: str, sender: Address):
                 should_resend = True
 
     # Remove routes that are no longer received
-    known_ips = routing_table.get_ips_from_routes(only_indirect_neighbours=True)
+    known_acquantaince_ips = routing_table.get_acquantainces()
+    known_neighbour_ips = routing_table.get_neighbours()
     received_ips = routing_table.parse_string_to_routing_table(message)
-    received_ips = routing_table.get_ips_from_routes(received_ips)
-    routes_to_remove = set(known_ips) - set(received_ips)
+    routes_to_remove = set(known_acquantaince_ips - known_neighbour_ips) - set(received_ips)
     if routes_to_remove:
         for ip in routes_to_remove:
             routing_table.remove_route(ip)
@@ -155,10 +154,10 @@ def handle_table(message: str, sender: Address):
 def handle_new_router(message: str):
     global router_ip
     new_router_ip = message[1:]
-    known_ips = routing_table.get_ips_from_routes()
+    known_ips = routing_table.get_acquantainces()
     if new_router_ip not in known_ips:
         routing_table.register_route(new_router_ip, 1, router_ip)
-        routing_table.alive_neighbour(new_router_ip)
+        routing_table.alive_acquantaince(new_router_ip)
         global should_resend
         should_resend = True
 
