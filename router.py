@@ -142,7 +142,7 @@ def handle_table(message: str, sender: Address):
                 should_resend = True
 
     # Remove routes that are no longer received
-    known_ips = routing_table.get_ips_from_routes()
+    known_ips = routing_table.get_ips_from_routes(only_indirect_neighbours=True)
     received_ips = routing_table.parse_string_to_routing_table(message)
     received_ips = routing_table.get_ips_from_routes(received_ips)
     routes_to_remove = set(known_ips) - set(received_ips)

@@ -31,10 +31,15 @@ class RoutingTable:
         neighbours = [route[0] for route in self.routes]
         return set(neighbours) - set({self.self_ip})
     
-    def get_ips_from_routes(self, routes: list[TableRow] | None = None) -> list[str]:
+    def get_ips_from_routes(self,
+                            routes: list[TableRow] | None = None,
+                            only_indirect_neighbours: bool = False,
+                            ) -> list[str]:
         """Returns the IPs of the destinations in the routing table."""
         if routes is None:
             routes = self.routes
+        if only_indirect_neighbours:
+            return [route[0] for route in routes if route[1] > 1]
         return [route[0] for route in routes]
 
     def update_route(self, ip: str, metric: int, output: str) -> None:
