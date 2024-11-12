@@ -1,7 +1,10 @@
 import re
 from socket import socket
 
-from config import TableRow, router_port
+from config import (
+    TableRow, router_port,
+    REGEX_TABLE_SYMBOL, REGEX_TABLE_SEPARATOR_SYMBOL,
+)
 
 
 class RoutingTable:
@@ -86,14 +89,14 @@ class RoutingTable:
 
     def serialize_routing_table_to_string(self) -> str:
         """Returns a string representation of the routing table for broadcasting."""
-        return "".join([f"@{route[0]}-{route[1]}" for route in self.routes])
+        return "".join([f"{REGEX_TABLE_SYMBOL}{route[0]}{REGEX_TABLE_SEPARATOR_SYMBOL}{route[1]}" for route in self.routes])
 
     def parse_string_to_routing_table(self, table_string: str) -> list[TableRow]:
         """Returns a list of routes from the given string representation of a routing table."""
-        table_rows = re.split(r'@', table_string)
+        table_rows = re.split(REGEX_TABLE_SYMBOL, table_string)
         table: list[TableRow] = []
         for row in table_rows[1:]:
-            ip, metric = row.split('-')
+            ip, metric = row.split(REGEX_TABLE_SEPARATOR_SYMBOL)
             table.append((ip, int(metric), None))
         return table
 

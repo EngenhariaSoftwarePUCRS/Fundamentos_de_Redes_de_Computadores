@@ -8,7 +8,9 @@ from socket import gethostname, gethostbyname, socket, AF_INET, SOCK_DGRAM
 from config import (
     MESSAGE_MAX_SIZE_UDP,
     INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_RESET_SOCKET, INTERVAL_STEP, CHECK_ALIVE_THRESHOLD,
-    REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
+    REGEX_TABLE_SYMBOL, REGEX_TABLE_SEPARATOR_SYMBOL, REGEX_TABLE_ANNOUNCEMENT,
+    REGEX_ROUTER_SYMBOL, REGEX_ROUTER_ANNOUNCEMENT,
+    REGEX_MESSAGE_SEPARATOR_SYMBOL, REGEX_MESSAGE,
     Address, router_port, default_neighbours_file,
 )
 from print import *
@@ -88,7 +90,7 @@ def get_neighbours(neighbours_file: str):
 
 
 def enter_network():
-    routing_table.broadcast_message_neighbours(f'*{router_ip}', router_socket)
+    routing_table.broadcast_message_neighbours(f'{REGEX_ROUTER_SYMBOL}{router_ip}', router_socket)
 
 
 def print_table_thread():
@@ -176,12 +178,12 @@ def handle_message(message: str, sender: Address):
 
 
 def handle_table(message: str, sender: Address):
-    message += f"@{sender[0]}-{1}"
-    table_row = re.split(r'@', message)
+    message += f"{REGEX_TABLE_SYMBOL}{sender[0]}{REGEX_TABLE_SEPARATOR_SYMBOL}{1}"
+    table_row = re.split(REGEX_TABLE_SYMBOL, message)
     global counter
     must_resend_table: bool = False
     for row in table_row[1:]:
-        ip, metric = row.split('-')
+        ip, metric = row.split(REGEX_TABLE_SEPARATOR_SYMBOL)
         # Check if I already know how to get to this IP
         route_to_ip = routing_table.get_route(ip)
         sender_ip = sender[0]
@@ -235,8 +237,8 @@ def handle_new_router(message: str):
 
 
 def handle_text_message(message: str):
-    sender_ip, target_ip, *content = re.split(r';', message[1:])
-    content = ';'.join(content)
+    sender_ip, target_ip, *content = re.split(REGEX_MESSAGE_SEPARATOR_SYMBOL, message[1:])
+    content = REGEX_MESSAGE_SEPARATOR_SYMBOL.join(content)
 
     if target_ip == router_ip:
         print_message_received(f'Message received from {sender_ip}: {content}')
