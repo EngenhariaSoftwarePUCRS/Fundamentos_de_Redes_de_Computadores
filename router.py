@@ -248,6 +248,7 @@ if __name__ == '__main__':
         router_ip = argv[2] if len(argv) > 2 else gethostbyname(gethostname())
         if len(argv) > 3:
             set_log_file(argv[3])
+        clear_log_file()
         main(neighbours_file)
     except KeyboardInterrupt:
         print_('green', 'Server stopping...')

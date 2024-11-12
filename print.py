@@ -71,3 +71,11 @@ def write_to_log_file(message: str) -> None:
             log.write(message + '\n')
     except Exception as e:
         print_('red', f'Error writing to log file: {e}')
+
+
+def clear_log_file() -> None:
+    try:
+        with open(log_file, 'w') as log:
+            log.write('')
+    except Exception as e:
+        print_('red', f'Error clearing log file: {e}')
