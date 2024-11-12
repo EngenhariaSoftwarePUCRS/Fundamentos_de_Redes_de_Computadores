@@ -13,7 +13,7 @@ class RoutingTable:
         """Initializes the routing table with the given IP and neighbours."""
         self.self_ip = my_ip
         self.routes = [(ip, 1, ip) for ip in initial_neighbours]
-        self.acquantainces_last_interaction = {}
+        self.acquantainces_last_interaction = {ip: 0 for ip in initial_neighbours}
     
     def register_route(self, ip: str, metric: int, output: str) -> None:
         """Inserts a new line in the routing table."""
@@ -64,7 +64,7 @@ class RoutingTable:
     def remove_dead_acquantainces(self, current_timestamp: int, threshhold: int) -> None:
         """Removes all acquantainces that have not interacted in the last threshhold seconds."""
         for acquantaince, last_interaction in self.acquantainces_last_interaction.items():
-            if current_timestamp - last_interaction > threshhold:
+            if current_timestamp - last_interaction >= threshhold:
                 self._remove_acquantaince(acquantaince)
 
     def broadcast_message_neighbours(self, message: str, socket: socket) -> None:

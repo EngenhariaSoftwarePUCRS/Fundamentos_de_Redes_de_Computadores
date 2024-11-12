@@ -143,7 +143,8 @@ def handle_table(message: str, sender: Address):
     known_acquantaince_ips = routing_table.get_acquantainces()
     known_neighbour_ips = routing_table.get_neighbours()
     received_ips = routing_table.parse_string_to_routing_table(message)
-    routes_to_remove = set(known_acquantaince_ips) - set(known_neighbour_ips) - set(received_ips)
+    indirect_neighbours = set(known_acquantaince_ips) - set(known_neighbour_ips)
+    routes_to_remove = indirect_neighbours - set(received_ips)
     if routes_to_remove:
         for ip in routes_to_remove:
             routing_table.remove_route(ip)
