@@ -220,10 +220,18 @@ def handle_table(message: str, sender: Address):
 def handle_new_router(message: str):
     global router_ip
     new_router_ip = message[1:]
-    known_ips = routing_table.get_acquantainces()
-    if new_router_ip not in known_ips:
-        routing_table.register_route(new_router_ip, 1, router_ip)
-        send_table_immediately()
+    if new_router_ip == router_ip:
+        print_('red', f"{new_router_ip} is already taken! (By me)")
+        return
+
+    route_to_new_ip = routing_table.get_route(new_router_ip)
+    if not route_to_new_ip:
+        routing_table.register_route(new_router_ip, 1, new_router_ip)
+    else:
+        routing_table.update_route(new_router_ip, 1, new_router_ip)
+
+    routing_table.alive_acquantaince(new_router_ip, counter)
+    send_table_immediately()
 
 
 def handle_text_message(message: str):
