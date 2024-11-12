@@ -61,8 +61,8 @@ class RoutingTable:
             if route[0] == ip or route[2] == ip:
                 self.routes.pop(i)
 
-    def remove_dead_acquantainces(self, current_timestamp: int, threshhold: int) -> bool:
-        """Removes all acquantainces that have not interacted in the last threshhold seconds. Returns True if any were removed."""
+    def remove_dead_acquantainces(self, current_timestamp: int, threshhold: int) -> list[str]:
+        """Removes all acquantainces that have not interacted in the last threshhold seconds. Returns the removed IPs."""
         removed = []
         for acquantaince, last_interaction in self.acquantainces_last_interaction.items():
             if current_timestamp - last_interaction >= threshhold:
@@ -72,7 +72,7 @@ class RoutingTable:
             ip: last_interaction for ip, last_interaction
                 in self.acquantainces_last_interaction.items()
                     if ip not in removed }
-        return len(removed) > 0
+        return removed
 
     def broadcast_message_neighbours(self, message: str, socket: socket) -> None:
         """Sends the given message to all neighbours (only directly connected)."""

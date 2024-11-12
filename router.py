@@ -153,7 +153,8 @@ def remove_dead_acquantainces_thread():
     while not stop_threads.is_set():
         removed_acquantainces = routing_table.remove_dead_acquantainces(counter, CHECK_ALIVE_THRESHOLD)
         if removed_acquantainces:
-            print_kill_acquantainces('Checking which neighbours are still alive...')
+            print_kill_acquantainces(f'Removed dead acquantainces {removed_acquantainces}...')
+            send_table_immediately()
         time.sleep(INTERVAL_STEP)
 
 
@@ -177,6 +178,8 @@ def handle_message(message: str, sender: Address):
 def handle_table(message: str, sender: Address):
     message += f"@{sender[0]}-{1}"
     table_row = re.split(r'@', message)
+    global counter
+    must_resend_table: bool = False
     for row in table_row[1:]:
         ip, metric = row.split('-')
         # Check if I already know how to get to this IP
@@ -187,14 +190,16 @@ def handle_table(message: str, sender: Address):
         elif not route_to_ip:
             metric = int(metric) + 1
             routing_table.register_route(ip, metric, sender_ip)
-            send_table_immediately()
+            routing_table.alive_acquantaince(ip, counter)
+            must_resend_table = True
         else:
             old_metric = route_to_ip[1]
             new_metric = int(metric) + 1
             if new_metric < old_metric:
                 # If I already know how to get to this IP, update the metric if it is lower
                 routing_table.update_route(ip, new_metric, sender_ip)
-                send_table_immediately()
+                routing_table.alive_acquantaince(ip, counter)
+                must_resend_table = True
 
     # Remove routes that are no longer received
     known_acquantaince_ips = routing_table.get_acquantainces()
@@ -206,6 +211,9 @@ def handle_table(message: str, sender: Address):
     if routes_to_remove:
         for ip in routes_to_remove:
             routing_table.remove_route(ip)
+        must_resend_table = True
+    
+    if must_resend_table:
         send_table_immediately()
 
 

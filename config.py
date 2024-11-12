@@ -10,7 +10,10 @@ MESSAGE_MAX_SIZE_UDP = 1024
 
 INTERVAL_DISPLAY_TABLE = 5
 INTERVAL_SEND_TABLE = 15
-INTERVAL_RESET_SOCKET = 10
+# This interval affects the Ctrl+C interruption
+# If it is too low, the program may loose some messages along the way
+# If it is too high, it will take longer to stop the program
+INTERVAL_RESET_SOCKET = 1000
 CHECK_ALIVE_THRESHOLD = 35
 INTERVAL_STEP = 1
 
