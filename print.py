@@ -56,7 +56,7 @@ def print_(color: Literal['black', 'red', 'green', 'yellow', 'blue', 'magenta', 
         print(color_mapper[color], end='')
         print(*args, **kwargs)
         print(color_mapper['reset'], end='')
-        if not log:
+        if log:
             write_to_log_file(' '.join(args))
 
 
