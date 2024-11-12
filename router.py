@@ -19,7 +19,7 @@ from routing_table import RoutingTable
 router_socket = socket(AF_INET, SOCK_DGRAM)
 router_socket.settimeout(1)
 
-router_ip: str = gethostbyname(gethostname())
+router_ip: str
 routing_table: RoutingTable
 
 should_resend: bool = True
@@ -182,13 +182,11 @@ def handle_text_message(message: str):
 
 
 if __name__ == '__main__':
+    print_('yellow', 'usage: python router.py [<neighbours_file>] [<router_ip>]')
     try:
         from sys import argv
-        if len(argv) <= 1:
-            print_('yellow', 'usage: python router.py [<neighbours_file>]')
-            neighbours_file = default_neighbours_file
-        else:
-            neighbours_file: str = argv[1]
+        neighbours_file = argv[1] if len(argv) > 1 else default_neighbours_file
+        router_ip = argv[2] if len(argv) > 2 else gethostbyname(gethostname())
         main(neighbours_file)
     except KeyboardInterrupt:
         print_('green', 'Server stopped')
