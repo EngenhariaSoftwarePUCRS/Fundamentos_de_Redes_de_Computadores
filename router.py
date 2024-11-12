@@ -219,7 +219,8 @@ def handle_new_router(message: str):
 
 
 def handle_text_message(message: str):
-    sender_ip, target_ip, content = re.split(r';', message[1:])
+    sender_ip, target_ip, *content = re.split(r';', message[1:])
+    content = ';'.join(content)
 
     if target_ip == router_ip:
         print_message_received(f'Message received from {sender_ip}: {content}')
