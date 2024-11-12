@@ -7,6 +7,7 @@ from socket import gethostname, gethostbyname, socket, AF_INET, SOCK_DGRAM
 
 from config import (
     MESSAGE_MAX_SIZE_UDP,
+    INTERVAL_DISPLAY_TABLE, INTERVAL_SEND_TABLE, INTERVAL_CHECK_ALIVE,
     REGEX_TABLE_ANNOUNCEMENT, REGEX_ROUTER_ANNOUNCEMENT, REGEX_MESSAGE,
     Address,
     router_port, default_neighbours_file,
@@ -39,26 +40,26 @@ def main(neighbours_file: str):
     while True:
         counter += 1
 
-        if counter % 3 == 0:
+        if counter % INTERVAL_DISPLAY_TABLE == 0:
             print_table(routing_table)
 
-        if counter % 15 == 0 or should_resend:
+        if counter % INTERVAL_SEND_TABLE == 0 or should_resend:
             print_send_message('Sending routing table to neighbours')
             r_table = routing_table.serialize_routing_table_to_string()
             routing_table.broadcast_message_neighbours(r_table, router_socket)
             should_resend = False
             continue
         
-        if counter == 35:
+        if counter % INTERVAL_CHECK_ALIVE == 0:
             print_kill_acquantainces('Checking which neighbours are still alive...')
-            routing_table.remove_dead_acquantainces()
-            counter = 0
+            routing_table.remove_dead_acquantainces(counter, INTERVAL_CHECK_ALIVE)
             continue
         
         try:
             print_waiting('Waiting for messages...')
             message, client = router_socket.recvfrom(MESSAGE_MAX_SIZE_UDP)
             message = message.decode()
+            routing_table.alive_acquantaince(client[0], counter)
             print_message_received(f'Received message: {message} from {client}')
             handle_message(message, client)
         except:
@@ -99,8 +100,6 @@ def user_input_thread():
 
 
 def handle_message(message: str, sender: Address):
-    routing_table.alive_acquantaince(sender[0])
-
     if len(message) == 0:
         return
 

@@ -7,13 +7,13 @@ from config import TableRow, router_port
 class RoutingTable:
     self_ip: str
     routes: list[TableRow]
-    live_acquantainces: dict[str, bool]
+    acquantainces_last_interaction: dict[str, int]
 
     def __init__(self, my_ip: str, initial_neighbours: list[str]):
         """Initializes the routing table with the given IP and neighbours."""
         self.self_ip = my_ip
         self.routes = [(ip, 1, ip) for ip in initial_neighbours]
-        self.live_acquantainces = {}
+        self.acquantainces_last_interaction = {}
     
     def register_route(self, ip: str, metric: int, output: str) -> None:
         """Inserts a new line in the routing table."""
@@ -51,9 +51,9 @@ class RoutingTable:
         """Removes the route to the given IP."""
         self.routes = [route for route in self.routes if route[0] != ip]
     
-    def alive_acquantaince(self, ip: str) -> None:
-        """Marks the given acquantaince as alive."""
-        self.live_acquantainces[ip] = True
+    def alive_acquantaince(self, ip: str, last_interaction_timestamp: int) -> None:
+        """Marks the given acquantaince as alive, updating its last interaction timestamp."""
+        self.acquantainces_last_interaction[ip] = last_interaction_timestamp
 
     def _remove_acquantaince(self, ip: str) -> None:
         """Removes the given acquantaince from the routing table, as destination or origin."""
@@ -61,22 +61,20 @@ class RoutingTable:
             if route[0] == ip or route[2] == ip:
                 self.routes.pop(i)
 
-    def remove_dead_acquantainces(self) -> None:
-        """Removes all acquantainces that are not alive."""
-        for acquantaince in self.live_acquantainces:
-            if not self.live_acquantainces[acquantaince]:
+    def remove_dead_acquantainces(self, current_timestamp: int, threshhold: int) -> None:
+        """Removes all acquantainces that have not interacted in the last threshhold seconds."""
+        for acquantaince, last_interaction in self.acquantainces_last_interaction.items():
+            if current_timestamp - last_interaction > threshhold:
                 self._remove_acquantaince(acquantaince)
 
     def broadcast_message_neighbours(self, message: str, socket: socket) -> None:
         """Sends the given message to all neighbours (only directly connected)."""
         for neighbour in self.get_neighbours():
-            self.live_acquantainces[neighbour] = False
             socket.sendto(message.encode(), (neighbour, router_port))
 
     def broadcast_message_acquantainces(self, message: str, socket: socket) -> None:
         """Sends the given message to all acquantainces (including indirectly connected)."""
         for acquantaince in self.get_acquantainces():
-            self.live_acquantainces[acquantaince] = False
             socket.sendto(message.encode(), (acquantaince, router_port))
 
     def serialize_routing_table_to_string(self) -> str:
