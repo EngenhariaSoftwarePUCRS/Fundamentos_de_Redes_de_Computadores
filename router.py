@@ -196,7 +196,9 @@ def handle_table(message: str, sender: Address):
         if ip == routing_table.self_ip:
             pass
         elif not route_to_ip:
-            metric = int(metric) + 1
+            metric = int(metric)
+            if ip != sender_ip:
+                metric += 1
             routing_table.register_route(ip, metric, sender_ip)
             must_resend_table = True
         else:
