@@ -253,10 +253,12 @@ def handle_text_message(message: str):
         print_('red', f'No route found to {target_ip}')
         return
 
+    hop_count = 1
     while metric != 1:
+        hop_count += 1
         next_hop, metric = routing_table.get_route(next_hop)
 
-    print_send_message(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {metric}')
+    print_send_message(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {hop_count}')
     router_socket.sendto(message.encode(), (next_hop, router_port))
 
 
