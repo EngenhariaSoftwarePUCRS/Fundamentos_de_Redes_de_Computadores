@@ -145,7 +145,12 @@ def user_input_thread():
 
         try:
             print_send_message(f'Sending message "{message}" to the network')
-            routing_table.broadcast_message_acquantainces(message, router_socket)
+            self_ip = re.split(REGEX_MESSAGE_SEPARATOR_SYMBOL, message[1:])[0]
+            if self_ip != router_ip:
+                print_('red', f'{self_ip} is not the same as {router_ip}. Please use {router_ip} as the sender IP')
+                continue
+
+            handle_text_message(message)
         except ValueError:
             print_('red', 'Invalid input. The correct format is ![YOUR_IP];[TARGET_IP];[MESSAGE]')
 
@@ -187,12 +192,12 @@ def handle_table(message: str, sender: Address):
         # Check if I already know how to get to this IP
         route_to_ip = routing_table.get_route(ip)
         sender_ip = sender[0]
+        routing_table.alive_acquantaince(sender_ip, counter)
         if ip == routing_table.self_ip:
             pass
         elif not route_to_ip:
             metric = int(metric) + 1
             routing_table.register_route(ip, metric, sender_ip)
-            routing_table.alive_acquantaince(ip, counter)
             must_resend_table = True
         else:
             old_metric = route_to_ip[1]
@@ -200,7 +205,6 @@ def handle_table(message: str, sender: Address):
             if new_metric < old_metric:
                 # If I already know how to get to this IP, update the metric if it is lower
                 routing_table.update_route(ip, new_metric, sender_ip)
-                routing_table.alive_acquantaince(ip, counter)
                 must_resend_table = True
 
     # Remove routes that are no longer received
@@ -244,17 +248,16 @@ def handle_text_message(message: str):
         print_message_received(f'Message received from {sender_ip}: {content}')
         return
     
-    route_to_ip = routing_table.get_route(target_ip)
-    if not route_to_ip:
+    next_hop, metric = routing_table.get_route(target_ip)
+    if not next_hop:
         print_('red', f'No route found to {target_ip}')
         return
 
-    next_hop, metric = route_to_ip
+    while metric != 1:
+        next_hop, metric = routing_table.get_route(next_hop)
+
     print_send_message(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {metric}')
-    if next_hop == router_ip:
-        router_socket.sendto(message.encode(), (target_ip, router_port))
-    else:
-        router_socket.sendto(message.encode(), (next_hop, router_port))
+    router_socket.sendto(message.encode(), (next_hop, router_port))
 
 
 if __name__ == '__main__':
