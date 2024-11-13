@@ -183,16 +183,21 @@ def handle_message(message: str, sender: Address):
 
 
 def handle_table(message: str, sender: Address):
-    message += f"{REGEX_TABLE_SYMBOL}{sender[0]}{REGEX_TABLE_SEPARATOR_SYMBOL}{1}"
-    table_row = re.split(REGEX_TABLE_SYMBOL, message)
     global counter
+
+    message += f"{REGEX_TABLE_SYMBOL}{sender[0]}{REGEX_TABLE_SEPARATOR_SYMBOL}{1}"
+
+    sender_ip = sender[0]
+    routing_table.alive_acquantaince(sender_ip, counter)
+
     must_resend_table: bool = False
+
+    table_row = re.split(REGEX_TABLE_SYMBOL, message)
     for row in table_row[1:]:
         ip, metric = row.split(REGEX_TABLE_SEPARATOR_SYMBOL)
         # Check if I already know how to get to this IP
         route_to_ip = routing_table.get_route(ip)
-        sender_ip = sender[0]
-        routing_table.alive_acquantaince(sender_ip, counter)
+        routing_table.alive_acquantaince(ip, counter)
         if ip == routing_table.self_ip:
             pass
         elif not route_to_ip:
