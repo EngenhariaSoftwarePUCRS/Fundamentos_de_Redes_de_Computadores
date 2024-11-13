@@ -250,14 +250,13 @@ def handle_text_message(message: str):
         print_message_received(f'Message received from {sender_ip}: {content}')
         return
     
-    next_hop, metric = routing_table.get_route(target_ip)
+    next_hop, hop_count = routing_table.get_route(target_ip)
     if not next_hop:
         print_('red', f'No route found to {target_ip}')
         return
 
-    hop_count = 1
+    metric = hop_count
     while metric != 1:
-        hop_count += 1
         next_hop, metric = routing_table.get_route(next_hop)
 
     print_send_message(f'Forwarding message to {target_ip} through {next_hop}, est. hop count: {hop_count}')
