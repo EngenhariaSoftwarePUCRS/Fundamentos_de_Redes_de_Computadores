@@ -197,7 +197,6 @@ def handle_table(message: str, sender: Address):
         ip, metric = row.split(REGEX_TABLE_SEPARATOR_SYMBOL)
         # Check if I already know how to get to this IP
         route_to_ip = routing_table.get_route(ip)
-        routing_table.alive_acquantaince(ip, counter)
         if ip == routing_table.self_ip:
             pass
         elif not route_to_ip:
