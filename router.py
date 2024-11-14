@@ -204,6 +204,7 @@ def handle_table(message: str, sender: Address):
             if ip != sender_ip:
                 metric += 1
             routing_table.register_route(ip, metric, sender_ip)
+            routing_table.alive_acquantaince(ip, counter)
             must_resend_table = True
         else:
             old_metric = route_to_ip[1]
@@ -211,6 +212,7 @@ def handle_table(message: str, sender: Address):
             if new_metric < old_metric:
                 # If I already know how to get to this IP, update the metric if it is lower
                 routing_table.update_route(ip, new_metric, sender_ip)
+                routing_table.alive_acquantaince(ip, counter)
                 must_resend_table = True
 
     # Remove routes that are no longer received
